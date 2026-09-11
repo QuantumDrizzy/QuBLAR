@@ -130,6 +130,11 @@ Per the working rule that a language is chosen by fit:
 
 ### Evidence
 
+> **Amended 2026-09-11, after the fact.** The paragraph below was the plan and it is not
+> what happened. It is left standing rather than rewritten, because a project whose whole
+> claim is that its numbers can be trusted does not get to quietly edit its own design
+> record. What was actually built, and what is genuinely missing, follows it.
+
 QuBLAR reuses `rse-hpc-lab`'s harness rather than growing its own, so that a number here
 is held to the same standard as a number there. `labkit` enters as a git submodule; the
 alternative — copying `evidence.hpp` — guarantees drift, and this project's whole claim is
@@ -137,6 +142,34 @@ that its numbers can be trusted.
 
 Declared quantities per measurement: rays traced per second, bytes moved (so G8 reads the
 hardware counter), and the invariants above as G6 checks.
+
+#### What was built instead
+
+There is **no `labkit` submodule and no `evidence.hpp`**. Each binary carries its own
+`check()` reporting and returns a non-zero exit code, and `check.bat` runs all of them.
+
+Two reasons, neither of them "we forgot":
+
+1. `labkit` drives a Python harness that builds and runs probes. ADR-002 moved this
+   project's entire build to a Windows host under `vcvars64`, because OptiX does not
+   work under WSL — so the harness would have had to be ported before it could be
+   reused, which is a larger job than the guards it brings.
+2. Most of what QuBLAR measures is **invariants**, not performance. `labkit`'s guards are
+   built around measurements that could be inflated; an analytic plane either agrees to
+   1e-6 m or it does not.
+
+#### What is genuinely missing, named rather than glossed
+
+- **G8 — hardware counters.** No `dram__bytes.sum` anywhere. The Phase 2 speedup is a
+  ratio of two implementations on identical input, which does not depend on it, but there
+  is no independent evidence about where either tracer's time actually goes.
+- **G3 — a physics ceiling.** 3884 Mray/s is reported against no ceiling, so "is that
+  close to what the RT cores can do?" is unanswered.
+- **G4 — a vendor baseline.** Satisfied structurally rather than by a guard: OptiX *is*
+  the vendor implementation, so the comparison has one by construction.
+- **G1 — architecture.** This one was missing and is now closed: `check.bat` verifies with
+  `cuobjdump` that every binary really contains `sm_120` code, rather than trusting that
+  the flag did what it said.
 
 ## Consequences
 

@@ -38,8 +38,10 @@ struct TransientConfig {
     /// which the hidden volume is observed.
     float wall_albedo = 0.8f;
 
-    /// Relative strength of the first-bounce wall return. Real systems see it saturate the
-    /// detector; here it is simply recorded at its natural amplitude of 1.
+    /// Record the first-bounce return off the relay wall itself, at its natural amplitude
+    /// of 1 -- four orders of magnitude above anything from the hidden object. On, because
+    /// it is in real data and has to be gated out by whoever processes it; off only when a
+    /// test wants the three-bounce feature in isolation.
     bool include_direct = true;
 
     unsigned seed = 0x51ED270Bu;
