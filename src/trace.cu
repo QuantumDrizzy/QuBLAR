@@ -144,7 +144,17 @@ int main() {
 
     // ---- 3. watertightness: no ray may escape a closed box from inside -------
     {
-        Scene s = make_box(4.0f, 8);
+        // A MILLION rays at subdiv 96, not thirty thousand at subdiv 8.
+        //
+        // The old test passed for weeks while the tracer leaked. Its box was coarse, so
+        // there were few shared edges to graze, and 30000 samples could not resolve a
+        // failure rate near one in a million. The leak was found only when the RT-core
+        // comparison ran this scene at this ray count and the two tracers disagreed.
+        //
+        // A test that cannot see the bug it is named after is decoration. The cost here
+        // is a fraction of a second.
+        constexpr int kWaterRays = 1 << 20;
+        Scene s = make_box(4.0f, 96);
         DeviceScene ds; ds.upload(s);
 
         std::vector<Ray> rays;
@@ -155,7 +165,8 @@ int main() {
         };
         // Fired from the exact centre, including straight down the axes and diagonals,
         // which are where a mesh's shared edges line up with the ray.
-        for (int i = 0; i < 30000; ++i) {
+        rays.reserve(kWaterRays);
+        for (int i = 0; i < kWaterRays; ++i) {
             float dx, dy, dz;
             if (i < 6) {                                   // the six axis directions
                 dx = (i == 0) - (i == 1); dy = (i == 2) - (i == 3); dz = (i == 4) - (i == 5);
@@ -173,8 +184,9 @@ int main() {
         const auto hits = run(ds, rays, false);
         int escaped = 0;
         for (const auto& h : hits) if (h.t < 0.f) escaped++;
-        check(escaped == 0, "no ray escapes a closed box (30000 rays)",
-              std::to_string(escaped) + " leaks");
+        check(escaped == 0, "no ray escapes a closed box (1M rays)",
+              std::to_string(escaped) + " leaks of " + std::to_string(kWaterRays)
+              + ", " + std::to_string(s.triangles.size()) + " triangles");
         ds.free();
     }
 

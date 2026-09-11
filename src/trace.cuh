@@ -36,93 +36,16 @@ using namespace argos;
         }                                                                             \
     } while (0)
 
-// -----------------------------------------------------------------------------
-// Device-side types. Deliberately plain: the same structs the host builds.
-// -----------------------------------------------------------------------------
-struct Ray {
-    float3 origin;
-    float3 direction;   // expected normalised
-    float  tmax;
-};
+#include "ray.hpp"
+#include "watertight.hpp"
 
-struct Hit {
-    float t;            // distance along the ray, or -1 for a miss
-    float3 normal;      // geometric, unnormalised sign fixed against the ray
-    int    triangle;
-    int    material;
-};
-
-__host__ __device__ __forceinline__ float3 operator-(const float3& a, const float3& b) {
-    return make_float3(a.x - b.x, a.y - b.y, a.z - b.z);
-}
-__host__ __device__ __forceinline__ float3 operator+(const float3& a, const float3& b) {
-    return make_float3(a.x + b.x, a.y + b.y, a.z + b.z);
-}
-__host__ __device__ __forceinline__ float3 operator*(const float3& a, float s) {
-    return make_float3(a.x * s, a.y * s, a.z * s);
-}
-__host__ __device__ __forceinline__ float d_dot(const float3& a, const float3& b) {
-    return a.x * b.x + a.y * b.y + a.z * b.z;
-}
-__host__ __device__ __forceinline__ float3 d_cross(const float3& a, const float3& b) {
-    return make_float3(a.y * b.z - a.z * b.y, a.z * b.x - a.x * b.z, a.x * b.y - a.y * b.x);
-}
-
-/// Moeller-Trumbore.
+/// Moeller-Trumbore lived here and was removed, not merely superseded.
 ///
-/// The epsilon is on the DETERMINANT and not on the barycentrics: a ray parallel to the
-/// triangle's plane is the degenerate case, and a ray that merely grazes an edge is not.
-/// Testing the barycentrics against an epsilon instead is the classic way to open a crack
-/// along every shared edge in the mesh.
-__host__ __device__ __forceinline__ bool intersect_triangle(
-    const float3& o, const float3& d,
-    const float3& v0, const float3& v1, const float3& v2,
-    float tmax, float& t_out, float3& n_out)
-{
-    const float3 e1 = v1 - v0;
-    const float3 e2 = v2 - v0;
-    const float3 p  = d_cross(d, e2);
-    const float det = d_dot(e1, p);
-
-    if (fabsf(det) < 1e-12f) return false;      // ray parallel to the plane
-
-    const float inv = 1.0f / det;
-    const float3 tv = o - v0;
-
-    // The barycentric bounds are relaxed by an epsilon, and the direction of that
-    // relaxation is the whole point.
-    //
-    // A ray striking a vertex shared by several triangles lands exactly on every one of
-    // their boundaries at once. Rounding can then put u or v a few ULP outside on ALL of
-    // them, every triangle rejects, and the ray passes through solid geometry.
-    //
-    // Kept as a defence, not as a fix: this was the first explanation offered for the six
-    // leaks the watertightness check found, and it was WRONG -- relaxing these bounds
-    // changed nothing. The leaks were a NaN in the slab test, see safe_inverse below. The
-    // epsilon stays because the failure mode it guards against is real and the cost is
-    // nil, but it has not been observed to catch anything here.
-    //
-    // Widening instead of tightening means adjacent triangles may both accept a
-    // boundary hit. That costs nothing: they report the same distance and the nearest-hit
-    // logic keeps one. A leak is a hole in a surface that is supposed to be closed, and
-    // for a LiDAR simulator holes appear precisely at edges and corners -- which is where
-    // the multi-return physics this project exists to study actually lives.
-    constexpr float kBary = 1e-6f;
-
-    const float u = d_dot(tv, p) * inv;
-    if (u < -kBary || u > 1.0f + kBary) return false;
-
-    const float3 q = d_cross(tv, e1);
-    const float v = d_dot(d, q) * inv;
-    if (v < -kBary || u + v > 1.0f + kBary) return false;
-
-    const float t = d_dot(e2, q) * inv;
-    if (t <= 1e-6f || t >= tmax) return false;   // behind the origin, or further than a known hit
-
-    t_out = t;
-    n_out = d_cross(e1, e2);
-    return true;
-}
+/// It is faster and it is not watertight: the two triangles sharing an edge evaluate
+/// that edge from different expressions, so a grazing ray can round outside both. The
+/// barycentric epsilon that used to sit here made the leak rarer without making it
+/// impossible -- and a rare wrong answer in a baseline is worse than a slow one, because
+/// everything measured against it inherits the error silently. See watertight.hpp.
 
 /// Reciprocal of a direction, with zero components nudged so the slab test cannot
 /// produce a NaN.
@@ -180,6 +103,7 @@ __host__ __device__ __forceinline__ Hit traverse_bvh(
     const Ray& r)
 {
     const float3 inv_d = safe_inverse(r.direction);
+    const RayShear shear = make_shear(r.direction);   // per ray, never per triangle
 
     float best_t = r.tmax;
     int   best_tri = -1;
@@ -205,7 +129,7 @@ __host__ __device__ __forceinline__ Hit traverse_bvh(
                 const float3 v1 = make_float3(tr.v1.x, tr.v1.y, tr.v1.z);
                 const float3 v2 = make_float3(tr.v2.x, tr.v2.y, tr.v2.z);
                 float t; float3 nrm;
-                if (intersect_triangle(r.origin, r.direction, v0, v1, v2, best_t, t, nrm)) {
+                if (intersect_triangle_wt(shear, r.origin, v0, v1, v2, best_t, t, nrm)) {
                     best_t = t; best_tri = ti; best_n = nrm;
                 }
             }
@@ -240,6 +164,7 @@ __host__ __device__ __forceinline__ Hit traverse_bvh(
 __host__ __device__ __forceinline__ Hit traverse_brute(
     const Triangle* __restrict__ tris, int n_tris, const Ray& r)
 {
+    const RayShear shear = make_shear(r.direction);
     float best_t = r.tmax;
     int best_tri = -1;
     float3 best_n = make_float3(0.f, 0.f, 0.f);
@@ -250,7 +175,7 @@ __host__ __device__ __forceinline__ Hit traverse_brute(
         const float3 v1 = make_float3(tr.v1.x, tr.v1.y, tr.v1.z);
         const float3 v2 = make_float3(tr.v2.x, tr.v2.y, tr.v2.z);
         float t; float3 nrm;
-        if (intersect_triangle(r.origin, r.direction, v0, v1, v2, best_t, t, nrm)) {
+        if (intersect_triangle_wt(shear, r.origin, v0, v1, v2, best_t, t, nrm)) {
             best_t = t; best_tri = ti; best_n = nrm;
         }
     }
@@ -326,8 +251,21 @@ static Scene make_box(float size, int subdiv) {
     // Subdivided so shared edges are numerous -- the watertightness test needs them.
     for (int i = 0; i < subdiv; ++i) {
         for (int j = 0; j < subdiv; ++j) {
-            const float x0 = -h + i * step, x1 = x0 + step;
-            const float y0 = -h + j * step, y1 = y0 + step;
+            // Both edges of a cell are computed from the SAME expression, and this is
+            // not pedantry. Writing x1 = x0 + step makes cell i's right edge a different
+            // float from cell i+1's left edge -- they differ by about one ULP, roughly
+            // 2.4e-7 at this magnitude, and that gap is a real crack between two quads
+            // that are supposed to share an edge.
+            //
+            // It stayed invisible for a long time. At subdiv 6 with 30000 rays the cracks
+            // are too coarse and too few to be struck. It surfaced only when the RT-core
+            // comparison fired a million incoherent rays at a subdiv-96 box: three of them
+            // escaped a closed box, two missed by OptiX and one by the CUDA baseline. That
+            // split is the whole diagnosis -- OptiX's intersector is watertight by
+            // construction, so a leak that hits BOTH tracers cannot be in either of them.
+            // The scene was open, and the generator opened it.
+            const float x0 = -h + i * step, x1 = -h + (i + 1) * step;
+            const float y0 = -h + j * step, y1 = -h + (j + 1) * step;
             s.add_quad({x0, y0, h}, {x1, y0, h}, {x1, y1, h}, {x0, y1, h}, 0);   // +z
             s.add_quad({x0, y1, -h}, {x1, y1, -h}, {x1, y0, -h}, {x0, y0, -h}, 0);
             s.add_quad({h, y0, x0}, {h, y1, x0}, {h, y1, x1}, {h, y0, x1}, 0);   // +x

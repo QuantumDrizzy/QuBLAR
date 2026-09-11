@@ -112,6 +112,12 @@ struct Scene {
     /// Triangle order the leaves index into -- the build permutes, the geometry does not.
     std::vector<int> indices;
 
+    /// Deepest path from the root, in nodes. The GPU traversal carries a fixed-size
+    /// stack, and this is the number that decides whether that stack is big enough.
+    /// Kept on the scene rather than recomputed, because a traversal that overflows its
+    /// stack does not crash -- it silently returns a miss through solid geometry.
+    int max_depth = 0;
+
     void add_material(float reflectance, float roughness = 0.f) {
         materials.push_back({reflectance, roughness});
     }
@@ -154,9 +160,11 @@ struct BuildCtx {
     std::vector<BvhNode>* nodes;
     std::vector<Aabb> bounds;     // per triangle, computed once
     std::vector<Vec3> centroids;
+    int max_depth = 0;
 };
 
-inline int build_recursive(BuildCtx& ctx, int first, int count) {
+inline int build_recursive(BuildCtx& ctx, int first, int count, int depth = 1) {
+    ctx.max_depth = std::max(ctx.max_depth, depth);
     const int node_index = static_cast<int>(ctx.nodes->size());
     ctx.nodes->push_back({});
 
@@ -253,8 +261,8 @@ inline int build_recursive(BuildCtx& ctx, int first, int count) {
         return node_index;
     }
 
-    build_recursive(ctx, first, left_count);                    // left is implicit: node+1
-    const int right = build_recursive(ctx, first + left_count, count - left_count);
+    build_recursive(ctx, first, left_count, depth + 1);         // left is implicit: node+1
+    const int right = build_recursive(ctx, first + left_count, count - left_count, depth + 1);
     write(right, 0);
     return node_index;
 }
@@ -280,6 +288,7 @@ inline void Scene::build() {
     nodes.clear();
     nodes.reserve(2 * n);
     if (n > 0) detail::build_recursive(ctx, 0, n);
+    max_depth = ctx.max_depth;
 }
 
 }  // namespace argos

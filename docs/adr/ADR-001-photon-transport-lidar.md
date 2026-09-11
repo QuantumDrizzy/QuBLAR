@@ -170,8 +170,8 @@ hardware counter), and the invariants above as G6 checks.
 7. [x] Invariants: analytic plane, zero-divergence limit, 1/d², cos θ
 
 **Phase 2 — the hardware path**
-8. [ ] OptiX build once the SDK is present; identical interface
-9. [ ] Measured speedup against item 2, same scene and rays
+8. [x] OptiX build once the SDK is present; identical interface
+9. [x] Measured speedup against item 2, same scene and rays
 10. [ ] Photon-counting detector: Poisson arrivals, dead time, ambient rate
 11. [ ] Convergence check against the linear model with dead time off
 
