@@ -178,4 +178,4 @@ hardware counter), and the invariants above as G6 checks.
 **Phase 3 — using it**
 12. [x] Reconstruction baselines: peak pick, matched filter, Gaussian decomposition
 13. [x] Scored against truth, not against each other
-14. [ ] Multi-bounce tracing, which is the door to non-line-of-sight
+14. [x] Multi-bounce tracing, which is the door to non-line-of-sight

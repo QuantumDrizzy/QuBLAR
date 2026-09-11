@@ -15,6 +15,8 @@ call compute-sanitizer --tool memcheck  build\check_lidar.exe || exit /b 1
 call compute-sanitizer --tool racecheck build\check_lidar.exe || exit /b 1
 call compute-sanitizer --tool memcheck  build\check_detector.exe || exit /b 1
 call compute-sanitizer --tool racecheck build\check_detector.exe || exit /b 1
+call compute-sanitizer --tool memcheck  build\check_transient.exe || exit /b 1
+call compute-sanitizer --tool racecheck build\check_transient.exe || exit /b 1
 
 echo.
 echo sanitizers clean

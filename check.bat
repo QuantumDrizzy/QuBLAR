@@ -9,6 +9,7 @@ rem of them fails, so this is usable without reading the output.
 build\trace.exe          || exit /b 1
 build\check_lidar.exe    || exit /b 1
 build\check_detector.exe || exit /b 1
+build\check_transient.exe || exit /b 1
 build\bench_trace.exe build\optix_programs.optixir || exit /b 1
 
 echo.

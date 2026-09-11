@@ -206,6 +206,34 @@ __host__ __device__ __forceinline__ float sample_power(
     return weight * reflectance * cos_theta / (range * range);
 }
 
+/// Add one return of amplitude `amp` arriving at time `t_r` into a waveform.
+///
+/// The Gaussian is INTEGRATED over each bin rather than sampled at bin centres, so a
+/// return carries the same total energy wherever it falls between two bin edges. Point
+/// sampling makes that energy wobble by a few percent with sub-bin phase, which looks
+/// exactly like tolerance and is in fact a bug -- it sinks the 1/d^2 invariant for reasons
+/// having nothing to do with range.
+///
+/// Shared by the direct and the multi-bounce transport models on purpose. Two copies of an
+/// energy-conserving bin integral is precisely the duplication that let the baseline
+/// tracer and the physics quietly stop describing the same geometry in Phase 2.
+__device__ __forceinline__ void splat_pulse(
+    float* wave, const SensorConfig& cfg, float t_r, float amp, float sigma)
+{
+    const float inv_sig_sqrt2 = 1.0f / (sigma * 1.41421356f);
+    const float t_lo = t_r - 4.0f * sigma, t_hi = t_r + 4.0f * sigma;
+    int k0 = static_cast<int>(floorf((t_lo - cfg.t0_seconds) / cfg.bin_seconds));
+    int k1 = static_cast<int>(ceilf ((t_hi - cfg.t0_seconds) / cfg.bin_seconds));
+    k0 = max(k0, 0); k1 = min(k1, cfg.bins - 1);
+    for (int k = k0; k <= k1; ++k) {
+        const float e0 = cfg.t0_seconds + k * cfg.bin_seconds;
+        const float e1 = e0 + cfg.bin_seconds;
+        const float frac = 0.5f * (erff((e1 - t_r) * inv_sig_sqrt2)
+                                 - erff((e0 - t_r) * inv_sig_sqrt2));
+        if (frac > 0.0f) atomicAdd(&wave[k], amp * frac);
+    }
+}
+
 // -----------------------------------------------------------------------------
 // The kernel
 // -----------------------------------------------------------------------------
@@ -263,7 +291,6 @@ __global__ void lidar_trace(
 
     const Beam beam = beams[beam_id];
     const float sigma = pulse_sigma(cfg);
-    const float inv_sig_sqrt2 = 1.0f / (sigma * 1.41421356f);
     const float inv_half_c = 2.0f / static_cast<float>(kSpeedOfLight);
     const float truth_cell = cfg.truth_merge_m / detail::kTruthSubdiv;
 
@@ -286,24 +313,8 @@ __global__ void lidar_trace(
         const float rho = mats[h.material].reflectance;
         const float amp = sample_power(w, rho, cos_theta, d);
 
-        // --- splat the transmitted pulse -------------------------------------
-        // The kernel is INTEGRATED over each bin rather than point-sampled at bin
-        // centres. Point sampling makes a return's total energy depend on where it falls
-        // relative to a bin edge, a wobble of a few percent that looks exactly like
-        // tolerance and is in fact a bug -- it would sink the 1/d^2 invariant for reasons
-        // having nothing to do with range.
         const float t_r = d * inv_half_c;              // round trip: 2d/c
-        const float t_lo = t_r - 4.0f * sigma, t_hi = t_r + 4.0f * sigma;
-        int k0 = static_cast<int>(floorf((t_lo - cfg.t0_seconds) / cfg.bin_seconds));
-        int k1 = static_cast<int>(ceilf ((t_hi - cfg.t0_seconds) / cfg.bin_seconds));
-        k0 = max(k0, 0); k1 = min(k1, cfg.bins - 1);
-        for (int k = k0; k <= k1; ++k) {
-            const float e0 = cfg.t0_seconds + k * cfg.bin_seconds;
-            const float e1 = e0 + cfg.bin_seconds;
-            const float frac = 0.5f * (erff((e1 - t_r) * inv_sig_sqrt2)
-                                     - erff((e0 - t_r) * inv_sig_sqrt2));
-            if (frac > 0.0f) atomicAdd(&wave[k], amp * frac);
-        }
+        splat_pulse(wave, cfg, t_r, amp, sigma);
 
         // --- record the truth ------------------------------------------------
         const int key = static_cast<int>(floorf(d / truth_cell));
