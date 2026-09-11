@@ -1,5 +1,5 @@
 // =============================================================================
-// ARGOS -- scene geometry and a bounding volume hierarchy
+// QuBLAR -- scene geometry and a bounding volume hierarchy
 // =============================================================================
 // The BVH here is deliberately ordinary: a binary tree over triangles, built on the
 // host by binned surface-area heuristic, flattened into an array the GPU walks.

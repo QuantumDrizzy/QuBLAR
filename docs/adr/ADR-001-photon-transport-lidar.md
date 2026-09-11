@@ -48,7 +48,7 @@ geometry-query engine, and sensing is a geometry-query problem.
 
 ## Decision
 
-Build **ARGOS**: a photon-transport LiDAR simulator that emits, for every beam,
+Build **QuBLAR**: a photon-transport LiDAR simulator that emits, for every beam,
 
 1. the **measurement** — a time-resolved return, in one of two detector models, and
 2. the **truth** — the exact ranges, normals and material ids of every surface the beam
@@ -130,7 +130,7 @@ Per the working rule that a language is chosen by fit:
 
 ### Evidence
 
-ARGOS reuses `rse-hpc-lab`'s harness rather than growing its own, so that a number here
+QuBLAR reuses `rse-hpc-lab`'s harness rather than growing its own, so that a number here
 is held to the same standard as a number there. `labkit` enters as a git submodule; the
 alternative — copying `evidence.hpp` — guarantees drift, and this project's whole claim is
 that its numbers can be trusted.
@@ -161,13 +161,13 @@ hardware counter), and the invariants above as G6 checks.
 ## Action items
 
 **Phase 1 — the generator**
-1. [ ] Scene representation and BVH build, procedural first
-2. [ ] CUDA BVH traversal: rays in, hits out
-3. [ ] Beam model: divergence, Monte Carlo footprint sampling
-4. [ ] Radiometry: 1/d², cos θ, per-material reflectance
-5. [ ] Linear-mode waveform accumulation with a Gaussian IRF
-6. [ ] Ground-truth emission alongside every waveform
-7. [ ] Invariants: analytic plane, zero-divergence limit, 1/d², cos θ
+1. [x] Scene representation and BVH build, procedural first
+2. [x] CUDA BVH traversal: rays in, hits out
+3. [x] Beam model: divergence, Monte Carlo footprint sampling
+4. [x] Radiometry: 1/d², cos θ, per-material reflectance
+5. [x] Linear-mode waveform accumulation with a Gaussian IRF
+6. [x] Ground-truth emission alongside every waveform
+7. [x] Invariants: analytic plane, zero-divergence limit, 1/d², cos θ
 
 **Phase 2 — the hardware path**
 8. [ ] OptiX build once the SDK is present; identical interface
