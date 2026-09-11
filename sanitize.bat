@@ -13,6 +13,8 @@ rem silently be the only one that ran, and the script would end without saying s
 call compute-sanitizer --tool memcheck  build\trace.exe       || exit /b 1
 call compute-sanitizer --tool memcheck  build\check_lidar.exe || exit /b 1
 call compute-sanitizer --tool racecheck build\check_lidar.exe || exit /b 1
+call compute-sanitizer --tool memcheck  build\check_detector.exe || exit /b 1
+call compute-sanitizer --tool racecheck build\check_detector.exe || exit /b 1
 
 echo.
 echo sanitizers clean

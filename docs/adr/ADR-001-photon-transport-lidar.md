@@ -172,10 +172,10 @@ hardware counter), and the invariants above as G6 checks.
 **Phase 2 — the hardware path**
 8. [x] OptiX build once the SDK is present; identical interface
 9. [x] Measured speedup against item 2, same scene and rays
-10. [ ] Photon-counting detector: Poisson arrivals, dead time, ambient rate
-11. [ ] Convergence check against the linear model with dead time off
+10. [x] Photon-counting detector: Poisson arrivals, dead time, ambient rate
+11. [x] Convergence check against the linear model with dead time off
 
 **Phase 3 — using it**
-12. [ ] Reconstruction baselines: peak pick, matched filter, Gaussian decomposition
-13. [ ] Scored against truth, not against each other
+12. [x] Reconstruction baselines: peak pick, matched filter, Gaussian decomposition
+13. [x] Scored against truth, not against each other
 14. [ ] Multi-bounce tracing, which is the door to non-line-of-sight
