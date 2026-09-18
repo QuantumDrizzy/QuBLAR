@@ -18,6 +18,12 @@ call compute-sanitizer --tool racecheck build\check_detector.exe || exit /b 1
 call compute-sanitizer --tool memcheck  build\check_transient.exe || exit /b 1
 call compute-sanitizer --tool racecheck build\check_transient.exe || exit /b 1
 
+rem check_external is deliberately absent: every GPU kernel it launches is
+rem transient_trace, already sanitized above via check_transient, and the rest
+rem of the binary is host-only code that compute-sanitizer does not see.
+rem Re-running the full replica under the sanitizer would cost tens of minutes
+rem and cover nothing new.
+
 echo.
 echo sanitizers clean
 endlocal

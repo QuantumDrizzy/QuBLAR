@@ -23,6 +23,7 @@ Built on an RTX 5060 Ti (Blackwell, sm_120) with CUDA 13.0 and OptiX 9.1.0.
 | **Detector** | Single-photon (SPAD/TCSPC): inhomogeneous Poisson arrivals by inverting the cumulative rate, non-paralysable dead time, ambient background. Produces real pile-up. |
 | **Reconstruction** | Peak pick, matched filter, greedy deconvolution, plus Coates pile-up correction — each scored against truth on detection, false alarms, bias and RMSE, never combined into one number. |
 | **Multi-bounce** | Confocal three-bounce transport, and non-line-of-sight reconstruction by filtered backprojection. |
+| **External validation** | The released confocal captures of O'Toole/Lindell/Wetzstein (Nature 2018) run through the same consumers: a port of the authors' light-cone transform (agreeing with their pipeline to 6.7e-8), phasor-field reconstruction, and the backprojection baseline -- scored against truth on a synthetic replica of the same rig. |
 
 ## Some measured results
 
@@ -34,6 +35,11 @@ Built on an RTX 5060 Ti (Blackwell, sm_120) with CUDA 13.0 and OptiX 9.1.0.
   essentially all of it ([details](docs/RESULTS-phase3.md)).
 - **An object nobody can see is located to 1.25 cm** from nothing but the timing of light
   that bounced off a wall ([details](docs/RESULTS-phase3b.md)).
+- **The captured Nature-2018 confocal data reconstructs here.** A backprojection written
+  from an independent transport model lands 1 cm from the published LCT result on the
+  same data, and the ported LCT matches a numpy mirror of the authors' MATLAB to
+  6.7e-8 ([details](docs/RESULTS-phase4.md) — including the phasor field, which is
+  implemented, honest about not yet working, and expected to fail).
 
 ## Build and check
 
@@ -51,6 +57,22 @@ sanitize.bat     REM compute-sanitizer memcheck and racecheck
 `check.bat` verifies with `cuobjdump` that every binary really contains `sm_120` code
 before reporting a single number, because `-arch=sm_120` is a request and not a
 confirmation.
+
+## External data (Phase 4)
+
+`check_external` runs without the captures, but its data section **fails by design**
+(`SKIP (no data)`) when they are absent: an all-green must be earned. To earn it:
+
+1. Download the release from the [project page](https://www.computationalimaging.org/publications/confocal-non-line-of-sight-imaging-based-on-the-light-cone-transform/)
+   ("LCT MATLAB code and data") and unzip it to `data/ext/lct/`.
+2. `python tools/mat_to_raw.py data/ext/lct/confocal_nlos_code` — converts the scenes
+   to `data/ext/*.bin` + `.meta`.
+3. `python tools/lct_reference.py data/ext diffuse_s --dump-full` — runs the numpy
+   mirror of the authors' pipeline and writes the golden volume the C++ port is
+   checked against.
+
+Python appears here for dataset packaging only, exactly as ADR-001 allows; the hot
+path stays CUDA/C++ and links nothing outside CUDA and OptiX.
 
 ## How to read this repository
 
@@ -84,7 +106,14 @@ passed a test suite at the time:
 - a missing `__syncthreads()` let one thread rescale the photon budget another was still
   reading — the histogram stayed entirely plausible;
 - a reconstruction grid ten times coarser than the range resolution put a hidden object
-  49 cm from where it was, with the transport model already completely correct.
+  49 cm from where it was, with the transport model already completely correct;
+- Phase 4's external-data run produced four more, each found only by dumping
+  intermediate state and diffing it against a reference
+  ([details](docs/RESULTS-phase4.md)): untrimmed meta keys parsed as an empty file;
+  relay planes left at simulator height mirrored the replica about z = 0.5; a PSF
+  circshift without its z dimension left 1023 of 1024 slices unnormalised while total
+  energy stayed correct; and a padded transform filled at an unpadded stride passed
+  every stage-sum check, because a sum is permutation-invariant.
 
 ADR-001's Evidence section carries an amendment recording that its original plan — reusing
 an external harness as a submodule — is **not** what was built, along with what is

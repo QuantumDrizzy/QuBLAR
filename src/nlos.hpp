@@ -95,14 +95,22 @@ inline std::vector<float> laplacian_filter(const std::vector<float>& tr, int n_r
 
 /// Vote every (relay point, time bin) onto the sphere it implies.
 ///
-/// Gated: bins before `t_gate` are discarded. The first-bounce return off the relay wall
-/// is orders of magnitude stronger than anything from the hidden object and would bury it
-/// completely. Real systems gate it out too, which is why it is simulated rather than
-/// suppressed at the source.
+/// Gated: bins before `t_gate` are discarded. The first-bounce return off the relay
+/// wall is orders of magnitude stronger than anything from the hidden object and would
+/// bury it completely. Real systems gate it out too, which is why it is simulated rather
+/// than suppressed at the source.
+///
+/// `l1_override` (ADR-005): when non-null, its entry r replaces |p - sensor| as the
+/// sensor-to-wall leg of the path. Released confocal data is pre-rectified -- each
+/// pixel's histogram was already shifted by its own 2|p-s|/c -- so for it the leg is
+/// zero and the shells are centred on the relay points themselves. Passing 0 there is
+/// not a special case invented for convenience; it is what their calibration did.
+/// Null means "compute from the sensor position", which is every pre-existing caller.
 inline void backproject(const std::vector<float>& transients,
                         const std::vector<RelayPoint>& relays,
                         float3 sensor, const SensorConfig& cfg,
-                        Voxels& vox, float t_gate_seconds)
+                        Voxels& vox, float t_gate_seconds,
+                        const std::vector<float>* l1_override = nullptr)
 {
     const double c = kSpeedOfLight;
     const int bins = cfg.bins;
@@ -110,6 +118,7 @@ inline void backproject(const std::vector<float>& transients,
 
     std::vector<double> L1(relays.size());
     for (size_t r = 0; r < relays.size(); ++r) {
+        if (l1_override) { L1[r] = (*l1_override)[r]; continue; }
         const float3 d = relays[r].position - sensor;
         L1[r] = std::sqrt(double(d.x) * d.x + double(d.y) * d.y + double(d.z) * d.z);
     }

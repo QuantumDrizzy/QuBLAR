@@ -2,3 +2,10 @@ build/
 *.exe
 *.o
 *.obj
+
+# Phase 4 (ADR-005): the external captures (1.4 GB of downloads, converted
+# dumps, golden reference, output PNGs). Regenerate with the two tools:
+#   python tools/mat_to_raw.py data/ext/lct/confocal_nlos_code
+#   python tools/lct_reference.py data/ext diffuse_s --dump-full
+data/
+.zcode/
