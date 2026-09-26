@@ -73,6 +73,12 @@ the same counts:
   declared prior (voids are rare, κ = 6.91, and compact, λ = 2), annealed to T = 1 over 16
   branches.
 
+![The tri-state map, orbited: cyan does not exist, amber undecided](docs/figures/tristate_orbit.gif)
+
+The map at 2²⁷ muons, turned once. Cyan voxels are the 11 that every branch calls void, amber
+are those the branches dispute, and grey is the pyramid's surface, subsampled. Only the camera
+moves ([`tools/render_tristate_orbit.py`](tools/render_tristate_orbit.py)).
+
 | muons / chamber | MLEM | found "does not exist" (correct) | centroid to the void's axis | IoU | false voids, empty pyramid | evidence: data vs prior (nats) |
 |---|---|---|---|---|---|---|
 | 2²⁵ | 30 m off | 1 (0) | 62 m | 0 | 1 | 303 < 421 |
@@ -91,6 +97,8 @@ the same counts:
 - **The false void at 2²⁵** sits 3.7 m from a chamber, just beyond the 3 m detector rooms
   that were removed from the unknowns after a first false void. It is reported, not
   re-tuned.
+
+The same map with the x = 0 plane of p(void), data only and then data + prior:
 
 ![binary branches](docs/figures/phase6_branches.png)
 

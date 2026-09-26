@@ -55,7 +55,8 @@ def centres(d: dict, mask: np.ndarray) -> np.ndarray:
                             d["lo"][2] + (k + 0.5) * d["voxel"]])
 
 
-def tri_state_panel(d: dict, size: int = 900) -> np.ndarray:
+def tri_state_panel(d: dict, size: int = 900, azimuth_deg: float = 35.0,
+                    extent: float = 2.3) -> np.ndarray:
     p = d["p"]
     inside = p >= 0
     shell = inside & ~(np.roll(inside, 1, 0) & np.roll(inside, -1, 0) & np.roll(inside, 1, 1)
@@ -75,8 +76,8 @@ def tri_state_panel(d: dict, size: int = 900) -> np.ndarray:
                            axis_names=("X", "Y", "Z"), axis_units=("m", "m", "m"),
                            axis_groups=((0, 1, 2),), basis="map")
     std, _, _ = standardise(cloud.points, cloud.axis_groups)
-    cam = Camera(azimuth_deg=35.0, elevation_deg=20.0, composite="front", point_size=3,
-                 basis="map", extent=2.3)
+    cam = Camera(azimuth_deg=azimuth_deg, elevation_deg=20.0, composite="front", point_size=3,
+                 basis="map", extent=extent)
     return render_frame(std, cloud.colour, view_matrix(3, 3), cam, (size, size))
 
 

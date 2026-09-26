@@ -9,3 +9,4 @@ build/
 #   python tools/lct_reference.py data/ext diffuse_s --dump-full
 data/
 .zcode/
+__pycache__/
