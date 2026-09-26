@@ -1,7 +1,16 @@
 # QuBLAR
 
-A LiDAR simulator that emits the **truth alongside every measurement**, so reconstruction
-algorithms can be scored against what actually happened rather than against each other.
+**An Ising photonic engine.** QuBLAR sends probes through a scene, counts what comes back,
+and emits the **truth alongside every measurement**, so reconstruction algorithms can be
+scored against what actually happened rather than against each other.
+- The probes: photons (LiDAR, non-line-of-sight imaging) and cosmic-ray muons.
+- The newest reconstruction: an Ising/QUBO engine that finds what is *not* there.
+
+*Quantum-inspired, not quantum.* The branch ensemble borrows Everett's picture (many
+complete worlds, weighted), without its ontology. The solver is classical annealing, and no
+qubits are involved.
+
+It began as a LiDAR simulator:
 
 Most range data is a point cloud: one distance per beam, with whatever produced it already
 thrown away. A real beam has angular divergence, so its footprint at range covers an area
@@ -40,6 +49,29 @@ Built on an RTX 5060 Ti (Blackwell, sm_120) with CUDA 13.0 and OptiX 9.1.0.
   same data, and the ported LCT matches a numpy mirror of the authors' MATLAB to
   6.7e-8 ([details](docs/RESULTS-phase4.md) — including the phasor field, which is
   implemented, honest about not yet working, and expected to fail).
+
+## The Ising engine, in one figure (ADR-007)
+
+![binary branches](docs/figures/phase6_branches.png)
+
+This is a synthetic ScanPyramids replica with **known truth**: a 30 m void at z = 77 m, seen
+by three point-like muon chambers.
+- **Continuous MLEM** puts its deficit peak 30 m away at every exposure. The apex artifact
+  is structural.
+- **The binary engine**, at 2²⁷ muons per chamber, marks 11 voxels "does not exist". All 11
+  are correct, the centroid is 0.1 m from the void's axis, and the empty pyramid yields zero
+  false voids.
+- **The evidence budget sets the threshold.** The data pay 303 / 466 / 773 / 1520 nats for
+  the true void at 2²⁵ to 2²⁸ muons, against the prior's 421. The void appears exactly when
+  the data win.
+- **The data alone** say only that something is missing along these rays. The prior (voids
+  are rare and compact) chooses where, and those voxels are labelled prior-driven.
+
+For the 20 most likely ghost bits, the exact local posterior (all 2²⁰ branches) calls every
+one void, at p ≥ 0.987. Blaze compresses that 20-way tensor about 26,000× (TT rank 1–2)
+and returns every marginal without rebuilding it. The compression is that large because
+the answer is sharp; weaker data would raise the ranks. See
+[RESULTS-phase6](docs/RESULTS-phase6.md).
 
 ## Build and check
 
@@ -85,6 +117,9 @@ document written after:
 | [ADR-002](docs/adr/ADR-002-optix-path.md) | the RT-core path, and **what its speedup is allowed to claim** |
 | [ADR-003](docs/adr/ADR-003-detector-and-reconstruction.md) | the photon-counting detector, and scoring reconstruction against truth |
 | [ADR-004](docs/adr/ADR-004-multibounce-nlos.md) | multi-bounce transport and seeing around a corner |
+| [ADR-005](docs/adr/ADR-005-external-validation.md) | real confocal NLOS captures, a ported LCT, and a phasor field |
+| [ADR-006](docs/adr/ADR-006-muon-tomography.md) | muon mode: a ScanPyramids replica, three views, and continuous MLEM's measured limit |
+| [ADR-007](docs/adr/ADR-007-binary-branches.md) | the Ising engine: each voxel a bit, branches as posterior samples, a tri-state map of what exists, what does not and what cannot be decided |
 
 ## On trusting the numbers
 

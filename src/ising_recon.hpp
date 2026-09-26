@@ -46,8 +46,12 @@ struct BinaryProblem {
     // 6-neighbour adjacency among variables, CSR
     std::vector<int> nbr_ptr, nbr;
     double lambda = 0.0, kappa = 0.0;
+    // Optional per-variable linear term replacing kappa: kappa plus lambda per
+    // neighbour frozen as rock (a bond to rock costs lambda iff x = 1).
+    std::vector<double> field;
 
     int n_vars() const { return int(var_voxel.size()); }
+    double lin(int i) const { return field.empty() ? kappa : field[i]; }
     int n_rays() const { return int(d.size()); }
 };
 
@@ -132,7 +136,7 @@ inline double binary_energy(const BinaryProblem& p, const std::vector<uint8_t>& 
     for (int i = 0; i < p.n_vars(); ++i) {
         if (x[i])
             for (int k = p.row_ptr[i]; k < p.row_ptr[i + 1]; ++k) r[p.ray[k]] += p.a[k];
-        prior += p.kappa * x[i];
+        prior += p.lin(i) * x[i];
         for (int k = p.nbr_ptr[i]; k < p.nbr_ptr[i + 1]; ++k)
             if (p.nbr[k] > i && x[p.nbr[k]] != x[i]) prior += p.lambda;
     }
@@ -172,7 +176,7 @@ inline std::vector<uint8_t> anneal_branch(const BinaryProblem& p, const Schedule
             ? s.t_hot * std::pow(s.t_cold / s.t_hot, frac) : s.t_cold;
         for (int i = 0; i < p.n_vars(); ++i) {
             const double delta = x[i] ? -1.0 : 1.0;   // +1: rock -> void
-            double dE = p.kappa * delta;
+            double dE = p.lin(i) * delta;
             for (int k = p.row_ptr[i]; k < p.row_ptr[i + 1]; ++k) {
                 const double a = p.a[k] * delta;
                 dE += p.w[p.ray[k]] * (r[p.ray[k]] * a + 0.5 * a * a);
@@ -195,13 +199,14 @@ inline std::vector<uint8_t> anneal_branch(const BinaryProblem& p, const Schedule
 /// optionally, the branches themselves (for export and Blaze).
 inline std::vector<float> branch_fractions(const BinaryProblem& p, const Schedule& s,
                                            int n_branches, unsigned n_threads,
-                                           std::vector<std::vector<uint8_t>>* keep = nullptr) {
+                                           std::vector<std::vector<uint8_t>>* keep = nullptr,
+                                           uint64_t seed_offset = 0) {
     std::vector<std::vector<uint8_t>> branches(n_branches);
     std::vector<std::thread> pool;
     for (unsigned t = 0; t < n_threads; ++t)
         pool.emplace_back([&, t] {
             for (int b = int(t); b < n_branches; b += int(n_threads))
-                branches[b] = anneal_branch(p, s, uint64_t(b) + 1);
+                branches[b] = anneal_branch(p, s, uint64_t(b) + 1 + seed_offset);
         });
     for (auto& th : pool) th.join();
     std::vector<float> frac(p.n_vars(), 0.0f);
@@ -210,6 +215,140 @@ inline std::vector<float> branch_fractions(const BinaryProblem& p, const Schedul
     for (float& f : frac) f /= float(n_branches);
     if (keep) *keep = std::move(branches);
     return frac;
+}
+
+/// Freeze every variable that cannot become void in ANY context, by a bound.
+///
+/// For a flip 0 -> 1 of variable i, with the other variables in any state:
+///   data:  dE >= sum_b w_b a_bi (a_bi / 2 - d_b)     (residual r_b >= -d_b,
+///          because every other voxel only ADDS deficit)
+///   prior: dE >= kappa + lambda * (#rock-frozen neighbours - #free neighbours)
+/// If the sum is >= margin nats, the flip has probability <= e^-margin at the
+/// posterior temperature: the variable is rock in every branch that matters,
+/// and it is fixed there. Freezing a variable turns its bonds into certainties,
+/// which tightens its neighbours' bounds: iterate to a fixpoint. The result is
+/// a smaller problem over the variables that can still change, with the bonds
+/// to frozen rock folded into their linear field. Exact for MAP; for sampling,
+/// the error per voxel and sweep is bounded by e^-margin.
+struct FreezeResult {
+    BinaryProblem reduced;
+    std::vector<int> kept;      // reduced variable -> original variable
+    int rounds = 0;
+};
+
+inline FreezeResult freeze_provable_rock(const BinaryProblem& p, double margin) {
+    const int n = p.n_vars();
+    std::vector<double> lb_data(n, 0.0);
+    for (int i = 0; i < n; ++i)
+        for (int k = p.row_ptr[i]; k < p.row_ptr[i + 1]; ++k)
+            lb_data[i] += p.w[p.ray[k]] * p.a[k] * (0.5 * p.a[k] - p.d[p.ray[k]]);
+    std::vector<uint8_t> frozen(n, 0);
+    FreezeResult out;
+    for (bool changed = true; changed; ++out.rounds) {
+        changed = false;
+        for (int i = 0; i < n; ++i) {
+            if (frozen[i]) continue;
+            int rock = 0, free = 0;
+            for (int k = p.nbr_ptr[i]; k < p.nbr_ptr[i + 1]; ++k)
+                (frozen[p.nbr[k]] ? rock : free)++;
+            const double lb = lb_data[i] + p.lin(i) + p.lambda * (rock - free);
+            if (lb >= margin) { frozen[i] = 1; changed = true; }
+        }
+    }
+    std::vector<int> new_index(n, -1);
+    for (int i = 0; i < n; ++i)
+        if (!frozen[i]) { new_index[i] = int(out.kept.size()); out.kept.push_back(i); }
+    BinaryProblem& r = out.reduced;
+    r.lambda = p.lambda;
+    r.kappa = p.kappa;
+    r.d = p.d;
+    r.w = p.w;
+    r.row_ptr.push_back(0);
+    r.nbr_ptr.push_back(0);
+    for (int i : out.kept) {
+        r.var_voxel.push_back(p.var_voxel[i]);
+        for (int k = p.row_ptr[i]; k < p.row_ptr[i + 1]; ++k) {
+            r.ray.push_back(p.ray[k]);
+            r.a.push_back(p.a[k]);
+        }
+        r.row_ptr.push_back(int(r.ray.size()));
+        int rock = 0;
+        for (int k = p.nbr_ptr[i]; k < p.nbr_ptr[i + 1]; ++k) {
+            if (frozen[p.nbr[k]]) ++rock;
+            else r.nbr.push_back(new_index[p.nbr[k]]);
+        }
+        r.nbr_ptr.push_back(int(r.nbr.size()));
+        r.field.push_back(p.lin(i) + p.lambda * rock);
+    }
+    r.voxel_var.assign(p.voxel_var.size(), -1);
+    for (int j = 0; j < r.n_vars(); ++j) r.voxel_var[r.var_voxel[j]] = j;
+    return out;
+}
+
+/// The conditional QUBO of a region of interest, everything else fixed.
+///
+/// With the variables outside R held at x_bar (the branch consensus), the
+/// energy over x_R in {0,1}^n is exactly
+///     E(x_R) = const + sum_i h_i x_i + sum_{i<j} J_ij x_i x_j
+/// from expanding 1/2 w (r_bar + sum a x)^2 (x^2 = x), the linear field, the
+/// bonds inside R ([x_i != x_j] = x_i + x_j - 2 x_i x_j) and the bonds to
+/// fixed neighbours ([x_i != x_bar] = x_i or 1 - x_i). Small enough (n <= ~24)
+/// to enumerate: the exact local posterior, 2^n branches, no sampling.
+struct RoiQubo {
+    std::vector<int> vars;        // original variable indices, in R's order
+    std::vector<double> h;        // n
+    std::vector<double> J;        // n*n, upper triangle used
+};
+
+inline RoiQubo roi_qubo(const BinaryProblem& p, const std::vector<int>& roi,
+                        const std::vector<uint8_t>& x_bar) {
+    const int n = int(roi.size());
+    RoiQubo q;
+    q.vars = roi;
+    q.h.assign(n, 0.0);
+    q.J.assign(size_t(n) * n, 0.0);
+    std::vector<int> pos(p.n_vars(), -1);
+    for (int i = 0; i < n; ++i) pos[roi[i]] = i;
+    // residuals with R switched off
+    std::vector<double> r(p.n_rays());
+    for (int b = 0; b < p.n_rays(); ++b) r[b] = -p.d[b];
+    for (int v = 0; v < p.n_vars(); ++v)
+        if (x_bar[v] && pos[v] < 0)
+            for (int k = p.row_ptr[v]; k < p.row_ptr[v + 1]; ++k) r[p.ray[k]] += p.a[k];
+    // data: linear and quadratic, through rays shared by R's variables
+    std::vector<std::vector<std::pair<int, double>>> by_ray(p.n_rays());
+    for (int i = 0; i < n; ++i)
+        for (int k = p.row_ptr[roi[i]]; k < p.row_ptr[roi[i] + 1]; ++k) {
+            const int b = p.ray[k];
+            const double a = p.a[k];
+            q.h[i] += p.w[b] * (r[b] * a + 0.5 * a * a);
+            by_ray[b].push_back({i, a});
+        }
+    for (int b = 0; b < p.n_rays(); ++b)
+        for (size_t u = 0; u < by_ray[b].size(); ++u)
+            for (size_t v = u + 1; v < by_ray[b].size(); ++v) {
+                int i = by_ray[b][u].first, j = by_ray[b][v].first;
+                if (i > j) std::swap(i, j);
+                q.J[size_t(i) * n + j] += p.w[b] * by_ray[b][u].second * by_ray[b][v].second;
+            }
+    // prior
+    for (int i = 0; i < n; ++i) {
+        const int vi = roi[i];
+        q.h[i] += p.lin(vi);
+        for (int k = p.nbr_ptr[vi]; k < p.nbr_ptr[vi + 1]; ++k) {
+            const int vj = p.nbr[k];
+            if (pos[vj] >= 0) {
+                if (pos[vj] > i) {
+                    q.h[i] += p.lambda;
+                    q.h[pos[vj]] += p.lambda;
+                    q.J[size_t(i) * n + pos[vj]] -= 2.0 * p.lambda;
+                }
+            } else {
+                q.h[i] += p.lambda * (x_bar[vj] ? -1.0 : 1.0);
+            }
+        }
+    }
+    return q;
 }
 
 enum class Bit : uint8_t { Exists = 0, NotThere = 1, Undecided = 2 };

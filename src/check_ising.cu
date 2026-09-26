@@ -20,7 +20,9 @@
 #include "muon_replica.hpp"
 #include "ising_recon.hpp"
 
+#include <algorithm>
 #include <chrono>
+#include <iterator>
 #include <cstdlib>
 #include <cstdio>
 #include <fstream>
@@ -270,6 +272,90 @@ int main(int argc, char** argv) {
                     std::min(1.0f, edges[k + 1]), n, n ? double(t) / n : 0.0);
     }
 
+    // ---- F. efficiency: the same answer for less work --------------------------
+    // Owner's rule: a result that holds at 50 % of the compute should not be
+    // bought at 100 %. Shorter schedules and fewer branches are measured
+    // against the default run above; a configuration counts as "same answer"
+    // only if its 'does not exist' set is IDENTICAL, voxel for voxel.
+    std::printf("\n  F. efficiency (reference: %d branches, %d + %d sweeps)\n",
+                kBranches, posterior.anneal_sweeps, posterior.hold_sweeps);
+    {
+        std::vector<int> ref;
+        for (int i = 0; i < prob.n_vars(); ++i)
+            if (classify(pv[i]) == Bit::NotThere) ref.push_back(i);
+        struct Cfg { int branches, anneal, hold; };
+        const Cfg cfgs[] = {{16, 100, 25}, {16, 50, 15}, {8, 200, 50}, {8, 100, 25},
+                            {8, 50, 15}, {4, 100, 25}};
+        std::printf("    %-9s %-15s %8s %10s %9s %s\n", "branches", "sweeps", "time s",
+                    "work (%)", "found", "same set as reference");
+        const double ref_work = double(kBranches) * (posterior.anneal_sweeps + posterior.hold_sweeps);
+        for (const Cfg& cf : cfgs) {
+            Schedule s = posterior;
+            s.anneal_sweeps = cf.anneal;
+            s.hold_sweeps = cf.hold;
+            const auto tc = std::chrono::steady_clock::now();
+            const std::vector<float> q = branch_fractions(prob, s, cf.branches, n_threads);
+            const double secs = seconds_since(tc);
+            std::vector<int> got;
+            int correct = 0;
+            for (int i = 0; i < prob.n_vars(); ++i)
+                if (classify(q[i]) == Bit::NotThere) {
+                    got.push_back(i);
+                    correct += truth[prob.var_voxel[i]];
+                }
+            const double work = 100.0 * cf.branches * (cf.anneal + cf.hold) / ref_work;
+            char sweeps[32];
+            std::snprintf(sweeps, sizeof(sweeps), "%d + %d", cf.anneal, cf.hold);
+            std::printf("    %-9d %-15s %8.1f %9.1f%% %4d (%d ok) %s\n", cf.branches, sweeps,
+                        secs, work, int(got.size()), correct, got == ref ? "yes" : "no");
+        }
+    }
+
+    // ---- G. the freeze: provable rock is not annealed ---------------------------
+    {
+        const double kMargin = 10.0;   // nats: a frozen flip has p <= e^-10 per sweep
+        std::printf("\n  G. freezing provable rock (margin %.0f nats)\n", kMargin);
+        std::vector<int> ref;
+        for (int i = 0; i < prob.n_vars(); ++i)
+            if (classify(pv[i]) == Bit::NotThere) ref.push_back(i);
+        // the yardstick: the reference itself with other seeds
+        const std::vector<float> pv_other = branch_fractions(prob, posterior, kBranches,
+                                                             n_threads, nullptr, 1000);
+        std::vector<int> other;
+        for (int i = 0; i < prob.n_vars(); ++i)
+            if (classify(pv_other[i]) == Bit::NotThere) other.push_back(i);
+        const auto jaccard = [](const std::vector<int>& a, const std::vector<int>& b) {
+            std::vector<int> both;
+            std::set_intersection(a.begin(), a.end(), b.begin(), b.end(), std::back_inserter(both));
+            const double uni = double(a.size() + b.size() - both.size());
+            return uni > 0 ? both.size() / uni : 1.0;
+        };
+        auto tf = std::chrono::steady_clock::now();
+        const FreezeResult fr = freeze_provable_rock(prob, kMargin);
+        const double t_freeze = seconds_since(tf);
+        tf = std::chrono::steady_clock::now();
+        const std::vector<float> pv_r = branch_fractions(fr.reduced, posterior, kBranches, n_threads);
+        const double t_anneal = seconds_since(tf);
+        std::vector<int> got;
+        int correct = 0;
+        for (int j = 0; j < fr.reduced.n_vars(); ++j)
+            if (classify(pv_r[j]) == Bit::NotThere) {
+                got.push_back(fr.kept[j]);
+                correct += truth[fr.reduced.var_voxel[j]];
+            }
+        std::sort(got.begin(), got.end());
+        std::printf("    variables annealed: %d of %d (%.2f%%), %d freeze rounds, %.2f s to prove\n",
+                    fr.reduced.n_vars(), prob.n_vars(), 100.0 * fr.reduced.n_vars() / prob.n_vars(),
+                    fr.rounds, t_freeze);
+        std::printf("    %d branches: %.2f s (reference %.1f s); found %d (%d correct)\n",
+                    kBranches, t_anneal, 6.9, int(got.size()), correct);
+        std::printf("    Jaccard vs reference: frozen run %.3f | same engine, other seeds %.3f\n",
+                    jaccard(got, ref), jaccard(other, ref));
+        check(jaccard(got, ref) >= jaccard(other, ref) - 0.15 && correct == int(got.size()),
+              "freezing keeps the answer within seed-to-seed spread",
+              num("frozen", jaccard(got, ref)) + ", " + num("seeds", jaccard(other, ref)));
+    }
+
     // ---- export ----------------------------------------------------------------
     {
         std::vector<float> grid(size_t(kN) * kN * kN, -1.0f);   // -1: outside the domain
@@ -290,6 +376,50 @@ int main(int argc, char** argv) {
         meta << "nx " << kN << "\nvoxel " << kVoxel << "\nlo " << kLo.x << " " << kLo.y << " "
              << kLo.z << "\nbranches " << kBranches << "\nvars " << prob.n_vars()
              << "\nlambda " << kLambda << "\nkappa " << kappa << "\n";
+        // the region of interest for tensor tooling (Blaze): the 20 variables
+        // with the highest p_void, conditioned on the branch consensus elsewhere
+        {
+            std::vector<int> order(prob.n_vars());
+            for (int i = 0; i < prob.n_vars(); ++i) order[i] = i;
+            std::partial_sort(order.begin(), order.begin() + 20, order.end(),
+                              [&](int u, int v) { return pv[u] > pv[v]; });
+            std::vector<int> roi(order.begin(), order.begin() + 20);
+            std::sort(roi.begin(), roi.end());
+            std::vector<uint8_t> x_bar(prob.n_vars());
+            for (int i = 0; i < prob.n_vars(); ++i) x_bar[i] = pv[i] >= 0.5f;
+            const RoiQubo q = roi_qubo(prob, roi, x_bar);
+            // oracle: E(x) - E(0) from the full energy equals the QUBO, for a
+            // few random x_R -- the expansion is checked, not trusted
+            double worst = 0.0;
+            std::vector<uint8_t> xf = x_bar;
+            for (int v : roi) xf[v] = 0;
+            const double e0 = binary_energy(prob, xf);
+            uint64_t st = 99;
+            for (int trial = 0; trial < 8; ++trial) {
+                std::vector<uint8_t> xr(roi.size());
+                for (auto& b : xr) b = detail::uniform(st) < 0.5;
+                for (size_t i = 0; i < roi.size(); ++i) xf[roi[i]] = xr[i];
+                double eq = 0.0;
+                for (size_t i = 0; i < roi.size(); ++i) {
+                    eq += q.h[i] * xr[i];
+                    for (size_t j = i + 1; j < roi.size(); ++j)
+                        eq += q.J[i * roi.size() + j] * xr[i] * xr[j];
+                }
+                worst = std::max(worst, std::fabs((binary_energy(prob, xf) - e0) - eq));
+            }
+            check(worst < 1e-6 * std::max(1.0, std::fabs(e0)),
+                  "ROI QUBO equals the full energy (8 random x)", num("worst abs err", worst));
+            std::ofstream fr("build\\ising_out_roi.txt");
+            fr.precision(17);
+            fr << roi.size() << "\n";
+            for (size_t i = 0; i < roi.size(); ++i)
+                fr << prob.var_voxel[roi[i]] << " " << pv[roi[i]] << " "
+                   << int(truth[prob.var_voxel[roi[i]]]) << " " << q.h[i] << "\n";
+            for (size_t i = 0; i < roi.size(); ++i) {
+                for (size_t j = 0; j < roi.size(); ++j) fr << q.J[i * roi.size() + j] << " ";
+                fr << "\n";
+            }
+        }
         std::printf("\n    exported build\\ising_out_* (p_void grids, truth, branches, meta)\n");
     }
 
