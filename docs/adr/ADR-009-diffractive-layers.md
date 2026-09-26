@@ -1,17 +1,25 @@
-# ADR-009 — Diffractive layers: the "photonic" in the engine, learned from truth
+# ADR-009 — A double-slit neural network: the "photonic" in the engine, learned from truth
 
 **Status:** Proposed. A note to design from after 2026-10-05; nothing here is built.
 **Date:** 2026-09-27
 **Depends on:** ADR-005 (phasor field), ADR-007 (branches), ADR-008 (the contract)
 
-## The picture that prompted it
+## One object, not two
 
-Two drawings, one above the other:
-- **Young's double slit**: a wave through apertures, and interference on the screen.
-- **A diffractive deep neural network (D²NN)**: Lin et al., *All-optical machine learning
-  using diffractive deep neural networks*, Science 361, 2018. Every point of a diffractive
-  layer is a Huygens source that reaches every point of the next layer, so a stack of layers
-  is a network whose weights are wave propagation.
+The picture that prompted this is a double slit and a neural network, drawn one above the
+other. They are **the same object**: a network whose layers *are* slit screens. This is what
+a diffractive deep neural network is (Lin et al., *All-optical machine learning using
+diffractive deep neural networks*, Science 361, 2018), read the owner's way:
+
+| Neural network | Double slit |
+|---|---|
+| a layer | a screen of apertures (slits) |
+| a weight | an aperture's transmission and phase, **learned** |
+| the weighted sum | interference: each aperture is a Huygens source reaching every point of the next screen |
+| the connection between layers | free-space propagation (Rayleigh–Sommerfeld) |
+| the nonlinearity | measurement: the detector sees intensity, \|field\|² |
+
+Nothing sits beside the interference to compute. **The interference is the computation.**
 
 ## What QuBLAR already has
 
@@ -25,8 +33,8 @@ Two drawings, one above the other:
 
 ## Proposal
 
-A diffractive stack inside QuBLAR's inference layer. Each layer is a propagation (the
-existing propagator) followed by a learnable phase mask. The masks are trained on synthetic
+The double-slit network as QuBLAR's photonic layer. Each layer is a learnable slit screen
+followed by a propagation, using the existing propagator. The masks are trained on synthetic
 scenes with known truth, and evaluated on held-out scenes and on the real Nature-2018
 captures. That is the literal sense of "it learns from data it never sees": the hidden scene
 is never observed directly, only through its truth labels on simulated twins.
@@ -38,8 +46,8 @@ is never observed directly, only through its truth labels on simulated twins.
 2. **A learned layer that does not beat physics is not used.** On held-out scenes it must beat
    LCT and backprojection, and it is scored against truth on the same metrics (detection,
    false alarms, bias, RMSE). A layer that ties is not used.
-3. **Amplitudes and probabilities stay apart.** The double slit is exactly where the two
-   differ. The wave layers add **amplitudes**, and interference is real there. QuBLAR's
+3. **Inside the network everything is amplitude, and the handover is a measurement.** The
+   double slit is exactly where amplitudes and probabilities differ. The wave layers add **amplitudes**, and interference is real there. QuBLAR's
    branches (ADR-007) add **probabilities**: classical samples, with Everett's vocabulary but
    no interference term. Diffraction feeds the forward model, and the Ising inference stays
    classical. Nothing may call a branch ensemble "interference".
