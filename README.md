@@ -154,3 +154,8 @@ ADR-001's Evidence section carries an amendment recording that its original plan
 an external harness as a submodule — is **not** what was built, along with what is
 genuinely missing as a result (no hardware-counter coverage, no physics ceiling for the
 ray-throughput figures). It is amended rather than rewritten on purpose.
+
+## License
+
+Proprietary. All rights reserved. See [LICENSE](LICENSE). Visibility for review or
+evaluation grants no right of use beyond reading.
