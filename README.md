@@ -1,10 +1,22 @@
 # QuBLAR
 
-**An Ising photonic engine.** QuBLAR sends probes through a scene, counts what comes back,
-and emits the **truth alongside every measurement**, so reconstruction algorithms can be
-scored against what actually happened rather than against each other.
-- The probes: photons (LiDAR, non-line-of-sight imaging) and cosmic-ray muons.
-- The newest reconstruction: an Ising/QUBO engine that finds what is *not* there.
+**An Ising photonic engine.** Imaging as inference: probes go through a scene, a forward
+model predicts what they should see, and every unknown becomes a bit of one QUBO. Annealing
+to T = 1 samples the posterior, and the answer is a three-state map (*exists*, *does not
+exist*, *cannot be decided*) with a measured certainty for each bit
+([ADR-008](docs/adr/ADR-008-ising-photonic-engine.md)).
+
+```
+  PROBE                     FORWARD MODEL                 INFERENCE
+  photons | muons | ...  ->  config x -> predicted data  ->  QUBO: data misfit + declared prior
+  truth emitted              A (sparse, per ray)            branches (annealed samples)
+                                                            tri-state map + certainty
+                                                            exact ROI posterior -> Blaze TT
+```
+
+- The probes: photons (LiDAR, non-line-of-sight imaging) and cosmic-ray muons. Each emits
+  its ground truth, so every reconstruction is scored against what actually happened.
+- The solvers are pluggable behind the QUBO; simulated annealing is the reference.
 
 *Quantum-inspired, not quantum.* The branch ensemble borrows Everett's picture (many
 complete worlds, weighted), without its ontology. The solver is classical annealing, and no
@@ -50,22 +62,47 @@ Built on an RTX 5060 Ti (Blackwell, sm_120) with CUDA 13.0 and OptiX 9.1.0.
   6.7e-8 ([details](docs/RESULTS-phase4.md) — including the phasor field, which is
   implemented, honest about not yet working, and expected to fail).
 
-## The Ising engine, in one figure (ADR-007)
+## Muon tomography: what exists, what does not (ADR-006, ADR-007)
+
+A synthetic ScanPyramids replica with **known truth**: a 30 m void at z = 77 m inside a
+pyramid, seen by three point-like muon chambers. Muons are attenuated along each ray
+(Beer-Lambert, cos² sky), and the chambers count what survives. Two reconstructions read
+the same counts:
+- **continuous MLEM** (transmission, three views), the classical baseline;
+- **the Ising engine**: 306,328 voxel bits and 75,594 rays in one QUBO, a data misfit plus a
+  declared prior (voids are rare, κ = 6.91, and compact, λ = 2), annealed to T = 1 over 16
+  branches.
+
+| muons / chamber | MLEM | found "does not exist" (correct) | centroid to the void's axis | IoU | false voids, empty pyramid | evidence: data vs prior (nats) |
+|---|---|---|---|---|---|---|
+| 2²⁵ | 30 m off | 1 (0) | 62 m | 0 | 1 | 303 < 421 |
+| 2²⁶ | 30 m off | 3 (3) | 0.3 m | 0.09 | 0 | 466 > 421 |
+| 2²⁷ (default) | 30 m off | 11 (11) | 0.1 m | 0.34 | 0 | 773 > 421 |
+| 2²⁸ | 30 m off | 15 (15) | 0.07 m | 0.47 | 0 | 1520 > 421 |
+
+- **MLEM puts its deficit peak 30 m away at every exposure.** The apex artifact is
+  structural, and it is filed as a known limit rather than tuned away.
+- **The evidence budget sets the threshold.** At 2²⁵ the data pay less than the prior
+  costs, and the posterior correctly declines the void. From 2²⁶ on, the data win and the
+  void appears.
+- **Data or prior.** With the prior switched off, the data say only *that* something is
+  missing along the rays, not *where*. Every found voxel is therefore labelled
+  prior-driven.
+- **The false void at 2²⁵** sits 3.7 m from a chamber, just beyond the 3 m detector rooms
+  that were removed from the unknowns after a first false void. It is reported, not
+  re-tuned.
 
 ![binary branches](docs/figures/phase6_branches.png)
 
-This is a synthetic ScanPyramids replica with **known truth**: a 30 m void at z = 77 m, seen
-by three point-like muon chambers.
-- **Continuous MLEM** puts its deficit peak 30 m away at every exposure. The apex artifact
-  is structural.
-- **The binary engine**, at 2²⁷ muons per chamber, marks 11 voxels "does not exist". All 11
-  are correct, the centroid is 0.1 m from the void's axis, and the empty pyramid yields zero
-  false voids.
-- **The evidence budget sets the threshold.** The data pay 303 / 466 / 773 / 1520 nats for
-  the true void at 2²⁵ to 2²⁸ muons, against the prior's 421. The void appears exactly when
-  the data win.
-- **The data alone** say only that something is missing along these rays. The prior (voids
-  are rare and compact) chooses where, and those voxels are labelled prior-driven.
+### Ghost bits as dimensions
+
+![3-, 6- and 9-cube of branches under annealing](docs/figures/dimensions_369.gif)
+
+The 12 voxels on which the annealed branches disagreed most. Their exact posterior (all
+2¹² configurations) is cooled from T ≈ 96 to 1, and 3, 6 and 9 of them are drawn as
+hypercubes: a vertex is a branch, an edge is one bit flip, and size and brightness are
+probability. At T = 1, **12/12 bits match the truth**. The disagreement was sampling, not
+missing evidence.
 
 For the 20 most likely ghost bits, the exact local posterior (all 2²⁰ branches) calls every
 one void, at p ≥ 0.987. Blaze compresses that 20-way tensor about 26,000× (TT rank 1–2)
@@ -120,6 +157,7 @@ document written after:
 | [ADR-005](docs/adr/ADR-005-external-validation.md) | real confocal NLOS captures, a ported LCT, and a phasor field |
 | [ADR-006](docs/adr/ADR-006-muon-tomography.md) | muon mode: a ScanPyramids replica, three views, and continuous MLEM's measured limit |
 | [ADR-007](docs/adr/ADR-007-binary-branches.md) | the Ising engine: each voxel a bit, branches as posterior samples, a tri-state map of what exists, what does not and what cannot be decided |
+| [ADR-008](docs/adr/ADR-008-ising-photonic-engine.md) | the contract: probe, forward model, inference, with the solvers pluggable behind the QUBO |
 
 ## On trusting the numbers
 
