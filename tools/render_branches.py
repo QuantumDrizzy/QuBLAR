@@ -1,7 +1,7 @@
 """Render the binary-branch result of check_ising (ADR-007) as a figure.
 
 Tooling over exported files, as ADR-001 allows: reads build/ising_out_*.bin and
-.meta, draws with ndim-lab's renderer (pip install -e ndim-lab), writes
+.meta, draws with a local N-dimensional renderer (the `ndim` package, unpublished), writes
 docs/figures/phase6_branches.png.
 
 Panel 1, the tri-state map in 3D:

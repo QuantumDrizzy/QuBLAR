@@ -65,7 +65,7 @@ reported.
 ### 4. General engine, with SUBSTRATE as its first consumer
 
 QuBLAR stays its own repository and stays general. SUBSTRATE, the quantum lab, is where it
-is used most, and a SESHAT bridge (ghost bits of a text) remains possible later. The bridges
+is used most, and a text bridge (ghost bits of a text) remains possible later. The bridges
 depend on the contract (§2) through exported files (`build/ising_out_*`) and, later, a C++
 library target. They never depend on check programs.
 

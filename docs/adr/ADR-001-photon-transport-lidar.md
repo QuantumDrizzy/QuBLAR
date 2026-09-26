@@ -43,7 +43,7 @@ geometry-query engine, and sensing is a geometry-query problem.
 - Ground truth is the entire point. Any physics the simulator gets wrong becomes a
   reconstruction result that is wrong in a way nothing can detect.
 - The OptiX SDK is behind an NVIDIA developer login, which is a manual step.
-- This inherits `rse-hpc-lab`'s discipline: a number that no probe produced does not get
+- This inherits my benchmark lab's discipline: a number that no probe produced does not get
   rendered, and a speedup needs something real to be measured against.
 
 ## Decision
@@ -135,7 +135,7 @@ Per the working rule that a language is chosen by fit:
 > claim is that its numbers can be trusted does not get to quietly edit its own design
 > record. What was actually built, and what is genuinely missing, follows it.
 
-QuBLAR reuses `rse-hpc-lab`'s harness rather than growing its own, so that a number here
+QuBLAR reuses my benchmark lab's harness rather than growing its own, so that a number here
 is held to the same standard as a number there. `labkit` enters as a git submodule; the
 alternative — copying `evidence.hpp` — guarantees drift, and this project's whole claim is
 that its numbers can be trusted.

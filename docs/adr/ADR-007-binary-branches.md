@@ -64,7 +64,7 @@ every result states them.
 - The schedule is geometric cooling, with the temperatures declared.
 - **The oracle:** exhaustive enumeration of a 16-voxel toy (2¹⁶ configurations). The
   annealer must reach its ground-state energy before any pyramid number is reported
-  (the rule of DRIFT and ndim-lab).
+  (the rule of DRIFT).
 - A CUDA path comes only after the host path is correct, and must match it.
 
 ### 3. Branches and the tri-state map
@@ -119,4 +119,4 @@ branches, as ADR-001 allows. The hot path stays C++/CUDA.
   check and sanitize.
 - `tools/export_branches.py` and `tools/branches_blaze.py` (Blaze) are tooling over
   exported files.
-- Rendering the tri-state map in 3D is ndim-lab's job, on the exported `.npz`.
+- Rendering the tri-state map in 3D is a separate renderer's job, on the exported `.npz`.
