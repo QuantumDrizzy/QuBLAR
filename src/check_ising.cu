@@ -409,6 +409,28 @@ int main(int argc, char** argv) {
             }
             check(worst < 1e-6 * std::max(1.0, std::fabs(e0)),
                   "ROI QUBO equals the full energy (8 random x)", num("worst abs err", worst));
+            // a second region: the 12 variables whose branches disagree most
+            // (p closest to 1/2) -- where the branches really compete
+            {
+                std::vector<int> ord(prob.n_vars());
+                for (int i = 0; i < prob.n_vars(); ++i) ord[i] = i;
+                std::partial_sort(ord.begin(), ord.begin() + 12, ord.end(), [&](int u, int v) {
+                    return std::fabs(pv[u] - 0.5f) < std::fabs(pv[v] - 0.5f);
+                });
+                std::vector<int> ru(ord.begin(), ord.begin() + 12);
+                std::sort(ru.begin(), ru.end());
+                const RoiQubo qu = roi_qubo(prob, ru, x_bar);
+                std::ofstream fu("build\\ising_out_roi_uncertain.txt");
+                fu.precision(17);
+                fu << ru.size() << "\n";
+                for (size_t i = 0; i < ru.size(); ++i)
+                    fu << prob.var_voxel[ru[i]] << " " << pv[ru[i]] << " "
+                       << int(truth[prob.var_voxel[ru[i]]]) << " " << qu.h[i] << "\n";
+                for (size_t i = 0; i < ru.size(); ++i) {
+                    for (size_t j = 0; j < ru.size(); ++j) fu << qu.J[i * ru.size() + j] << " ";
+                    fu << "\n";
+                }
+            }
             std::ofstream fr("build\\ising_out_roi.txt");
             fr.precision(17);
             fr << roi.size() << "\n";
