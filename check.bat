@@ -10,7 +10,7 @@ rem without reading the output.
 rem Architecture first, because everything below reports numbers that are only meaningful
 rem if they came from the hardware they claim to. -arch=sm_120 is a request; this is the
 rem confirmation that the request was honoured.
-for %%B in (trace check_lidar check_detector check_transient check_external bench_trace) do (
+for %%B in (trace check_lidar check_detector check_transient check_external check_muon bench_trace) do (
     cuobjdump -lelf build\%%B.exe | findstr /C:"sm_120" >nul || (
         echo ARCH CHECK FAILED: build\%%B.exe contains no sm_120 code
         exit /b 1

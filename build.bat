@@ -22,31 +22,34 @@ set "FLAGS=-O3 -arch=sm_120 -std=c++17 -lineinfo"
 
 if not exist build mkdir build
 
-echo [1/7] trace
+echo [1/8] trace
 nvcc %FLAGS% -o build\trace.exe src\trace.cu || exit /b 1
 
-echo [2/7] check_lidar
+echo [2/8] check_lidar
 nvcc %FLAGS% -o build\check_lidar.exe src\check_lidar.cu || exit /b 1
 
 rem OptiX device programs compile to OptiX-IR, never to PTX: CUDA 13 validates --ptx
 rem output with ptxas, which rejects the OptiX intrinsics as unknown symbols.
-echo [3/7] optix module
+echo [3/8] optix module
 nvcc --optix-ir -rdc=true -arch=sm_120 -std=c++17 -I "%OPTIX%\include" ^
      -o build\optix_programs.optixir src\optix_programs.cu || exit /b 1
 
 rem advapi32 is needed because OptiX's loader reads the registry to find the driver DLL.
-echo [4/7] bench_trace
+echo [4/8] bench_trace
 nvcc %FLAGS% -I "%OPTIX%\include" -o build\bench_trace.exe src\bench_trace.cu ^
      "%CUDA%\lib\x64\cuda.lib" advapi32.lib || exit /b 1
 
-echo [5/7] check_detector
+echo [5/8] check_detector
 nvcc %FLAGS% -o build\check_detector.exe src\check_detector.cu || exit /b 1
 
-echo [6/7] check_transient
+echo [6/8] check_transient
 nvcc %FLAGS% -o build\check_transient.exe src\check_transient.cu || exit /b 1
 
-echo [7/7] check_external
+echo [7/8] check_external
 nvcc %FLAGS% -o build\check_external.exe src\check_external.cu || exit /b 1
+
+echo [8/8] check_muon
+nvcc %FLAGS% -o build\check_muon.exe src\check_muon.cu || exit /b 1
 
 echo.
 echo built into build\

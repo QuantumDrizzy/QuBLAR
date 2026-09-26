@@ -17,6 +17,8 @@ call compute-sanitizer --tool memcheck  build\check_detector.exe || exit /b 1
 call compute-sanitizer --tool racecheck build\check_detector.exe || exit /b 1
 call compute-sanitizer --tool memcheck  build\check_transient.exe || exit /b 1
 call compute-sanitizer --tool racecheck build\check_transient.exe || exit /b 1
+call compute-sanitizer --tool memcheck build\check_muon.exe || exit /b 1
+call compute-sanitizer --tool racecheck build\check_muon.exe || exit /b 1
 
 rem check_external is deliberately absent: every GPU kernel it launches is
 rem transient_trace, already sanitized above via check_transient, and the rest
