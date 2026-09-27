@@ -51,8 +51,14 @@ nvcc %FLAGS% -o build\check_external.exe src\check_external.cu || exit /b 1
 echo [8/9] check_muon
 nvcc %FLAGS% -o build\check_muon.exe src\check_muon.cu || exit /b 1
 
-echo [9/9] check_ising
+echo [9/11] check_ising
 nvcc %FLAGS% -o build\check_ising.exe src\check_ising.cu || exit /b 1
+
+echo [10/11] check_mine
+nvcc %FLAGS% -o build\check_mine.exe src\check_mine.cu || exit /b 1
+
+echo [11/11] check_ahead
+nvcc %FLAGS% -o build\check_ahead.exe src\check_ahead.cu || exit /b 1
 
 echo.
 echo built into build\

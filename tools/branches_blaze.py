@@ -76,7 +76,10 @@ def main() -> None:
     X_sig = (np.arange(1 << n)[:, None] >> (n - 1 - np.arange(n))) & 1
     exact = (p[:, None] * X_sig).sum(axis=0)
     tensor = p.reshape((2,) * n)
+    answer = blaze.verdict(tensor, rel_tol=1e-6)
     print(f"region: {n} ghost bits -> {1 << n:,} branches, dense {tensor.nbytes / 2**20:.1f} MiB")
+    print(f"  verdict {answer.kind.value}: ratio {answer.ratio:.4g}, "
+          f"measured {answer.measured_rel_error}")
     print(f"  MAP branch probability {p.max():.4f}; states holding 99 % of the mass: "
           f"{int(np.searchsorted(np.cumsum(np.sort(p)[::-1]), 0.99)) + 1:,}")
 

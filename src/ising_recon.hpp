@@ -29,6 +29,7 @@
 #include <algorithm>
 #include <cmath>
 #include <cstdint>
+#include <limits>
 #include <thread>
 #include <vector>
 
@@ -55,16 +56,29 @@ struct BinaryProblem {
     int n_rays() const { return int(d.size()); }
 };
 
-/// Build the QUBO from binned data, the no-void model (host medium: the
+/// Build the QUBO from binned data, the no-anomaly model (host medium: the
 /// surveyed outer shape, solid rock inside) and the domain of unknown voxels.
+///
+/// a_bv = a_per_metre * ℓ_bv. Default a_per_metre = mu_rock is the void path
+/// (ADR-007 §1): x = 1 removes rock attenuation. For a denser body with
+/// declared contrast δμ = μ_body − μ_rock > 0 (ADR-006 §1: μ ∝ ρ), pass
+/// a_per_metre = −δμ so the same deficit d_b = τ⁰ − t matches the surplus
+/// optical depth. Do not invent a scale: δμ comes from the declared density
+/// ratio times the engine's μ_rock.
 inline BinaryProblem build_binary_problem(const VoxelMedium& m_model,
                                           const std::vector<MuonView>& views,
                                           const std::vector<char>& domain,
                                           double lambda, double kappa,
-                                          double min_open = 30.0) {
+                                          double min_open = 30.0,
+                                          float a_per_metre =
+                                              std::numeric_limits<float>::quiet_NaN()) {
     BinaryProblem p;
     p.lambda = lambda;
     p.kappa = kappa;
+    // NaN => void path (a = mu_rock). Ore uses a negative coefficient; do not
+    // treat sign as the default sentinel.
+    const float a_scale =
+        std::isnan(a_per_metre) ? m_model.mu_rock : a_per_metre;
     const size_t n_vox = size_t(m_model.nx) * m_model.ny * m_model.nz;
     p.voxel_var.assign(n_vox, -1);
     for (size_t v = 0; v < n_vox; ++v)
@@ -88,7 +102,7 @@ inline BinaryProblem build_binary_problem(const VoxelMedium& m_model,
             march_impl(m_model, view.chamber, dir, [&](int idx, float seg) {
                 const int var = p.voxel_var[idx];
                 if (var >= 0) {
-                    entries.push_back({var, r, m_model.mu_rock * seg});
+                    entries.push_back({var, r, a_scale * seg});
                     touches = true;
                 }
                 return 0.0f;
@@ -162,6 +176,28 @@ inline uint64_t splitmix(uint64_t& s) {
 inline double uniform(uint64_t& s) { return (splitmix(s) >> 11) * 0x1.0p-53; }
 }  // namespace detail
 
+/// ΔE for a proposed flip of variable i, given residuals that match x.
+/// Does not flip and does not draw a random. Shared by the annealer and the
+/// host local-field check so there is one formula, not two.
+///
+/// LYTH (ADR-0026) refuses data-dependent branches. The Metropolis accept
+/// (dE <= 0 or uniform < exp(-dE/T)) branches on data and on a random draw,
+/// so it stays in C++ and must not become a .lyth kernel.
+inline double local_field_dE(const BinaryProblem& p, const std::vector<uint8_t>& x,
+                             const std::vector<double>& r, int i) {
+    const double delta = x[i] ? -1.0 : 1.0;   // +1: rock -> void
+    double dE = p.lin(i) * delta;
+    for (int k = p.row_ptr[i]; k < p.row_ptr[i + 1]; ++k) {
+        const double a = p.a[k] * delta;
+        dE += p.w[p.ray[k]] * (r[p.ray[k]] * a + 0.5 * a * a);
+    }
+    for (int k = p.nbr_ptr[i]; k < p.nbr_ptr[i + 1]; ++k) {
+        const bool before = x[p.nbr[k]] != x[i];
+        dE += p.lambda * (before ? -1.0 : 1.0);
+    }
+    return dE;
+}
+
 /// One branch: anneal from all-rock at t_hot down to t_cold, hold, return x.
 inline std::vector<uint8_t> anneal_branch(const BinaryProblem& p, const Schedule& s,
                                           uint64_t seed) {
@@ -176,15 +212,8 @@ inline std::vector<uint8_t> anneal_branch(const BinaryProblem& p, const Schedule
             ? s.t_hot * std::pow(s.t_cold / s.t_hot, frac) : s.t_cold;
         for (int i = 0; i < p.n_vars(); ++i) {
             const double delta = x[i] ? -1.0 : 1.0;   // +1: rock -> void
-            double dE = p.lin(i) * delta;
-            for (int k = p.row_ptr[i]; k < p.row_ptr[i + 1]; ++k) {
-                const double a = p.a[k] * delta;
-                dE += p.w[p.ray[k]] * (r[p.ray[k]] * a + 0.5 * a * a);
-            }
-            for (int k = p.nbr_ptr[i]; k < p.nbr_ptr[i + 1]; ++k) {
-                const bool before = x[p.nbr[k]] != x[i];
-                dE += p.lambda * (before ? -1.0 : 1.0);
-            }
+            const double dE = local_field_dE(p, x, r, i);
+            // Metropolis accept: stays in C++ (data-dependent + random); not LYTH.
             if (dE <= 0.0 || detail::uniform(state) < std::exp(-dE / temp)) {
                 x[i] ^= 1u;
                 for (int k = p.row_ptr[i]; k < p.row_ptr[i + 1]; ++k)
