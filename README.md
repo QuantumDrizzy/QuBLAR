@@ -1,4 +1,10 @@
-# QuBLAR
+<p align="center">
+  <img src="docs/figures/qublar_recall.gif" alt="QμBLAR" width="820"/>
+</p>
+
+# QμBLAR
+
+*The μ is the muon: QμBLAR images a hidden structure with cosmic-ray muons, among other probes. The repository keeps the ASCII name QuBLAR, since GitHub names cannot hold a μ.*
 
 **An Ising photonic engine.** Imaging as inference: probes go through a scene, a forward
 model predicts what they should see, and every unknown becomes a bit of one QUBO. Annealing
