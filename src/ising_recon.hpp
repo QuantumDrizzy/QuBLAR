@@ -24,7 +24,9 @@
 
 #pragma once
 
+#include "engine.hpp"
 #include "muon_recon.hpp"
+#include "op_muon.hpp"
 
 #include <algorithm>
 #include <cmath>
@@ -35,36 +37,18 @@
 
 namespace argos {
 
-struct BinaryProblem {
-    // variables: the domain voxels, in voxel order
-    std::vector<int> var_voxel;       // variable -> voxel index
-    std::vector<int> voxel_var;       // voxel -> variable, or -1
-    // rays: every populated bin of every view
-    std::vector<double> d, w;
-    // CSR: variable -> (ray, a)
-    std::vector<int> row_ptr, ray;
-    std::vector<float> a;
-    // 6-neighbour adjacency among variables, CSR
-    std::vector<int> nbr_ptr, nbr;
-    double lambda = 0.0, kappa = 0.0;
-    // Optional per-variable linear term replacing kappa: kappa plus lambda per
-    // neighbour frozen as rock (a bond to rock costs lambda iff x = 1).
-    std::vector<double> field;
-
-    int n_vars() const { return int(var_voxel.size()); }
-    double lin(int i) const { return field.empty() ? kappa : field[i]; }
-    int n_rays() const { return int(d.size()); }
-};
-
-/// Build the QUBO from binned data, the no-anomaly model (host medium: the
-/// surveyed outer shape, solid rock inside) and the domain of unknown voxels.
+/// Build the QUBO from binned muon data, the no-anomaly model (host medium: the
+/// surveyed outer shape, solid rock inside) and the domain of unknown sites.
+/// Since L1 (ADR-017) this is three plug-ins: a grid BitField, the muon sensor's
+/// rows, and the Ising prior. The result is identical, array for array, to the
+/// pre-L1 builder (check_engine proves it on every build).
 ///
-/// a_bv = a_per_metre * ℓ_bv. Default a_per_metre = mu_rock is the void path
+/// a_bv = a_per_metre * l_bv. Default a_per_metre = mu_rock is the void path
 /// (ADR-007 §1): x = 1 removes rock attenuation. For a denser body with
-/// declared contrast δμ = μ_body − μ_rock > 0 (ADR-006 §1: μ ∝ ρ), pass
-/// a_per_metre = −δμ so the same deficit d_b = τ⁰ − t matches the surplus
-/// optical depth. Do not invent a scale: δμ comes from the declared density
-/// ratio times the engine's μ_rock.
+/// declared contrast dmu = mu_body - mu_rock > 0 (ADR-006 §1: mu ~ rho), pass
+/// a_per_metre = -dmu so the same deficit d_b = tau0 - t matches the surplus
+/// optical depth. Do not invent a scale: dmu comes from the declared density
+/// ratio times the engine's mu_rock.
 inline BinaryProblem build_binary_problem(const VoxelMedium& m_model,
                                           const std::vector<MuonView>& views,
                                           const std::vector<char>& domain,
@@ -72,74 +56,9 @@ inline BinaryProblem build_binary_problem(const VoxelMedium& m_model,
                                           double min_open = 30.0,
                                           float a_per_metre =
                                               std::numeric_limits<float>::quiet_NaN()) {
-    BinaryProblem p;
-    p.lambda = lambda;
-    p.kappa = kappa;
-    // NaN => void path (a = mu_rock). Ore uses a negative coefficient; do not
-    // treat sign as the default sentinel.
-    const float a_scale =
-        std::isnan(a_per_metre) ? m_model.mu_rock : a_per_metre;
-    const size_t n_vox = size_t(m_model.nx) * m_model.ny * m_model.nz;
-    p.voxel_var.assign(n_vox, -1);
-    for (size_t v = 0; v < n_vox; ++v)
-        if (domain[v]) {
-            p.voxel_var[v] = int(p.var_voxel.size());
-            p.var_voxel.push_back(int(v));
-        }
-
-    struct Entry { int var, ray; float a; };
-    std::vector<Entry> entries;
-    for (const MuonView& view : views) {
-        const MuonBinnedData& data = *view.data;
-        for (int b = 0; b < data.size(); ++b) {
-            if (double(data.open[b]) < min_open) continue;
-            const float3 dir = data.bin_direction(b);
-            const double tau0 = march_medium(m_model, view.chamber, dir);
-            const double det = std::max(double(data.det[b]), 1.0);
-            const double t = -std::log(det / double(data.open[b]));
-            const int r = p.n_rays();
-            bool touches = false;
-            march_impl(m_model, view.chamber, dir, [&](int idx, float seg) {
-                const int var = p.voxel_var[idx];
-                if (var >= 0) {
-                    entries.push_back({var, r, a_scale * seg});
-                    touches = true;
-                }
-                return 0.0f;
-            });
-            if (!touches) continue;
-            p.d.push_back(tau0 - t);
-            p.w.push_back(det);
-        }
-    }
-    std::sort(entries.begin(), entries.end(),
-              [](const Entry& x, const Entry& y) { return x.var < y.var; });
-    p.row_ptr.assign(p.n_vars() + 1, 0);
-    for (const Entry& e : entries) p.row_ptr[e.var + 1]++;
-    for (int i = 0; i < p.n_vars(); ++i) p.row_ptr[i + 1] += p.row_ptr[i];
-    p.ray.resize(entries.size());
-    p.a.resize(entries.size());
-    for (size_t k = 0; k < entries.size(); ++k) {
-        p.ray[k] = entries[k].ray;
-        p.a[k] = entries[k].a;
-    }
-
-    const int nx = m_model.nx, ny = m_model.ny, nz = m_model.nz;
-    p.nbr_ptr.assign(p.n_vars() + 1, 0);
-    for (int i = 0; i < p.n_vars(); ++i) {
-        const int v = p.var_voxel[i];
-        const int x = v % nx, y = (v / nx) % ny, z = v / (nx * ny);
-        const int cand[6][3] = {{x - 1, y, z}, {x + 1, y, z}, {x, y - 1, z},
-                                {x, y + 1, z}, {x, y, z - 1}, {x, y, z + 1}};
-        for (const auto& c : cand) {
-            if (c[0] < 0 || c[0] >= nx || c[1] < 0 || c[1] >= ny || c[2] < 0 || c[2] >= nz)
-                continue;
-            const int u = p.voxel_var[(size_t(c[2]) * ny + c[1]) * nx + c[0]];
-            if (u >= 0) p.nbr.push_back(u);
-        }
-        p.nbr_ptr[i + 1] = int(p.nbr.size());
-    }
-    return p;
+    const BitField bits = BitField::grid(m_model.nx, m_model.ny, m_model.nz, domain);
+    const OperatorRows muons = muon_rows(m_model, views, bits, min_open, a_per_metre);
+    return assemble(bits, {&muons}, IsingPrior{lambda, kappa});
 }
 
 /// Energy of a configuration, from scratch (for tests and the oracle).

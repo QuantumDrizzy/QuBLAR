@@ -1,6 +1,6 @@
 # ADR-017 — QμBLAR as an engine: five layers, from one pipeline to a platform
 
-**Status:** Proposed (architecture only; no code until accepted)
+**Status:** Accepted 2026-09-28. L1 built: see `docs/RESULTS-engine-L1.md`
 **Date:** 2026-09-28
 **Deciders:** Antonio
 **Supersedes, as direction:** the one-pipeline shape of ADR-007/008. Their results stand.

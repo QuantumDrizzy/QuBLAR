@@ -70,6 +70,14 @@ rem to gset_bench's CPU engine per seed. Holds device code, so check.bat's sm_12
 echo [13/13] gpu_anneal
 nvcc %FLAGS% -I src -o build\gpu_anneal.exe tools\gpu_anneal.cu || exit /b 1
 
+rem The engine's model layer (ADR-017 L1): the regression against the pre-L1 builder,
+rem the adjoint and shell-theorem checks, and gravity as a second sensor.
+echo [14/15] check_engine
+nvcc %FLAGS% -o build\check_engine.exe src\check_engine.cu || exit /b 1
+
+echo [15/15] check_gravity
+nvcc %FLAGS% -o build\check_gravity.exe src\check_gravity.cu || exit /b 1
+
 echo.
 echo built into build\
 endlocal
