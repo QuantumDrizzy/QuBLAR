@@ -1,0 +1,4 @@
+a63419f608fecdbc8f201da2c7bb2cca91d0b72e55d319a7f1752a193c9e6c16  ADR-016.prereg-frozen.md
+frozen_at 2026-09-28T06:07:22+02:00
+git_head 7308c62 (P1 uncommitted in the working tree)
+written before any P2 kernel code (src/ising_gpu.cuh, tools/gpu_anneal.cu do not exist yet)

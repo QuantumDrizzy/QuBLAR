@@ -1,0 +1,3 @@
+instance,plan,rate_cpu_per_s,rate_gpu_per_s,speedup,wall_gpu_s,wall_cpu_s,kernel_ms,launches,sweeps_per_launch,runs_gpu,runs_cpu
+G1,CSR, w int8, f int8, shared state,387238373.731446,11141972745.578382,28.772904,4.940798,5.067266,4937.145020,56,76,16384,584
+G22,CSR, w int8, f int8, shared state,510657758.925593,9529917283.448418,18.662043,14.441427,14.672841,14433.271484,140,30,16384,892

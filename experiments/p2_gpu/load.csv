@@ -1,0 +1,4 @@
+instance,path,sha256,sha256_expected,sha_ok,n,m,n_plus1,n_minus1,counts_ok,sigma,w_min,field_bound,plan
+G1,data\gset\G1,73bf704d8ffc55ba42260ab4cb659e3dcb6e729be70404d2cf476ba4e46d1665,73bf704d8ffc55ba42260ab4cb659e3dcb6e729be70404d2cf476ba4e46d1665,1,800,19176,19176,0,1,6.923872,1,67,CSR, w int8, f int8, shared state
+G22,data\gset\G22,9baeee06eb147b1c9ca42b43be86592d4e6fc60784a85af9be5b63d1362ef28e,9baeee06eb147b1c9ca42b43be86592d4e6fc60784a85af9be5b63d1362ef28e,1,2000,19990,19990,0,1,4.471018,1,37,CSR, w int8, f int8, shared state
+G81,data\gset\G81,74e69d2f5228774cedbdb86da14debf08023556f1d7693b7346ca13df7594d5a,74e69d2f5228774cedbdb86da14debf08023556f1d7693b7346ca13df7594d5a,1,20000,40000,20017,19983,1,2.000000,1,4,CSR, w int8, f int8, global state

@@ -65,6 +65,11 @@ rem device code, so check.bat's sm_120 cuobjdump loop does not list it.
 echo [12/12] gset_bench
 nvcc %FLAGS% -I src -o build\gset_bench.exe tools\gset_bench.cu || exit /b 1
 
+rem GPU annealing engine (ADR-016): the P1 integer engine, one warp per replica, bit-identical
+rem to gset_bench's CPU engine per seed. Holds device code, so check.bat's sm_120 loop lists it.
+echo [13/13] gpu_anneal
+nvcc %FLAGS% -I src -o build\gpu_anneal.exe tools\gpu_anneal.cu || exit /b 1
+
 echo.
 echo built into build\
 endlocal

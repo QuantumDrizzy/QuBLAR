@@ -1,0 +1,13 @@
+G1: n 800 m 19176, sha ok, counts ok, CSR, w int8, f int8, shared state, T_hot 6.924 T_cold 0.100
+  GPU: 16384 replicas, wall 4.941 s (kernels 4937.1 ms, 56 launches of 76 sweeps)
+  CPU: 584 runs on 16 threads, wall 5.067 s (matched to 4.941 s)
+  gpu runs  16384  best 11624 (target 11624, gap 0.000000%)  mean 11617.289368  p 0.638489  rate 1.114e+10/s  TTS99 0.001365 s [0.001336, 0.001392]  consistent yes
+  cpu runs    584  best 11624 (target 11624, gap 0.000000%)  mean 11617.943493  p 0.650685  rate 3.872e+08/s  TTS99 0.037991 s [0.034111, 0.042089]  consistent yes
+  speedup 28.77x; CPU/GPU identical 584 of 584 shared seeds; oracle mismatches 0 of 1000
+G22: n 2000 m 19990, sha ok, counts ok, CSR, w int8, f int8, shared state, T_hot 4.471 T_cold 0.100
+  GPU: 16384 replicas, wall 14.441 s (kernels 14433.3 ms, 140 launches of 30 sweeps)
+  CPU: 892 runs on 16 threads, wall 14.673 s (matched to 14.441 s)
+  gpu runs  16384  best 13359 (target 13359, gap 0.000000%)  mean 13349.864319  p 0.003967  rate 9.530e+09/s  TTS99 1.021126 s [0.809008, 1.328074]  consistent yes
+  cpu runs    892  best 13359 (target 13359, gap 0.000000%)  mean 13349.747758  p 0.003363  rate 5.107e+08/s  TTS99 22.485746 s [9.615064, inf]  consistent yes
+  speedup 18.66x; CPU/GPU identical 892 of 892 shared seeds; oracle mismatches 0 of 1000
+G81: n 20000 m 40000, sha ok, counts ok, CSR, w int8, f int8, global state, T_hot 2.000 T_cold 0.100
