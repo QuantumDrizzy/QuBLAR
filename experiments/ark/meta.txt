@@ -1,0 +1,12 @@
+log2M 23
+seeds 8
+nb 25200
+n_th 70
+n_az 360
+th_max 1.221730
+ndet 6
+vol2m 104 72 14 lo -104 -72 -22 vox 2
+vol1m 208 144 28 lo -104 -72 -22 vox 1
+jv_1gev 70.156312
+jv_p0 87.594031
+leaks 0
