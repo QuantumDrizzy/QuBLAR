@@ -1,0 +1,233 @@
+{
+ "B1": {
+  "X": null,
+  "claim": "no OD in [0, 6] where GI beats the camera by >= 1 dB",
+  "per_tau": {
+   "0": {
+    "beats": false,
+    "wins_of_8": 0,
+    "median_dPSNR_dB": -29.542196108518347
+   },
+   "0.5": {
+    "beats": false,
+    "wins_of_8": 0,
+    "median_dPSNR_dB": -20.462149928472783
+   },
+   "1": {
+    "beats": false,
+    "wins_of_8": 0,
+    "median_dPSNR_dB": -13.425202214733035
+   },
+   "2": {
+    "beats": false,
+    "wins_of_8": 0,
+    "median_dPSNR_dB": -7.023169605311497
+   },
+   "3": {
+    "beats": false,
+    "wins_of_8": 0,
+    "median_dPSNR_dB": -4.606821521192081
+   },
+   "4": {
+    "beats": false,
+    "wins_of_8": 0,
+    "median_dPSNR_dB": -3.619833123912472
+   },
+   "5": {
+    "beats": false,
+    "wins_of_8": 0,
+    "median_dPSNR_dB": -3.165735509538341
+   },
+   "6": {
+    "beats": false,
+    "wins_of_8": 0,
+    "median_dPSNR_dB": -2.95284558003409
+   }
+  }
+ },
+ "B1_pred": {
+  "pass_": true,
+  "statement": "GI does NOT beat the camera at any tau <= 2 at N = 1e7"
+ },
+ "B2": {
+  "N=100000": {
+   "X": null,
+   "per_tau": {
+    "0": {
+     "beats": false,
+     "wins_of_8": 0,
+     "median_dPSNR_dB": -8.67293552441425
+    },
+    "0.5": {
+     "beats": false,
+     "wins_of_8": 0,
+     "median_dPSNR_dB": -6.937715227512529
+    },
+    "1": {
+     "beats": false,
+     "wins_of_8": 0,
+     "median_dPSNR_dB": -5.09601733501707
+    },
+    "2": {
+     "beats": false,
+     "wins_of_8": 0,
+     "median_dPSNR_dB": -2.760533099328976
+    },
+    "3": {
+     "beats": false,
+     "wins_of_8": 0,
+     "median_dPSNR_dB": -1.7857163327723438
+    },
+    "4": {
+     "beats": false,
+     "wins_of_8": 0,
+     "median_dPSNR_dB": -1.4725971935610893
+    },
+    "5": {
+     "beats": false,
+     "wins_of_8": 0,
+     "median_dPSNR_dB": -1.235867316991282
+    },
+    "6": {
+     "beats": false,
+     "wins_of_8": 0,
+     "median_dPSNR_dB": -1.1478132113922843
+    }
+   }
+  },
+  "N=1e+09": {
+   "X": 2,
+   "per_tau": {
+    "0": {
+     "beats": false,
+     "wins_of_8": 0,
+     "median_dPSNR_dB": -35.8105972949087
+    },
+    "0.5": {
+     "beats": false,
+     "wins_of_8": 0,
+     "median_dPSNR_dB": -8.58784178250399
+    },
+    "1": {
+     "beats": false,
+     "wins_of_8": 0,
+     "median_dPSNR_dB": -1.4675021935611827
+    },
+    "2": {
+     "beats": true,
+     "wins_of_8": 8,
+     "median_dPSNR_dB": 4.200200333743476
+    },
+    "3": {
+     "beats": true,
+     "wins_of_8": 8,
+     "median_dPSNR_dB": 6.330001249327677
+    },
+    "4": {
+     "beats": true,
+     "wins_of_8": 8,
+     "median_dPSNR_dB": 7.220607115572329
+    },
+    "5": {
+     "beats": true,
+     "wins_of_8": 8,
+     "median_dPSNR_dB": 7.5863670104261445
+    },
+    "6": {
+     "beats": true,
+     "wins_of_8": 8,
+     "median_dPSNR_dB": 7.801256952595333
+    }
+   }
+  },
+  "wiener_N=1e7": {
+   "X": null,
+   "per_tau": {
+    "0": {
+     "beats": false,
+     "wins_of_8": 0,
+     "median_dPSNR_dB": -29.54219610851836
+    },
+    "0.5": {
+     "beats": false,
+     "wins_of_8": 0,
+     "median_dPSNR_dB": -26.741581375733013
+    },
+    "1": {
+     "beats": false,
+     "wins_of_8": 0,
+     "median_dPSNR_dB": -23.376641588694607
+    },
+    "2": {
+     "beats": false,
+     "wins_of_8": 0,
+     "median_dPSNR_dB": -16.04434900265909
+    },
+    "3": {
+     "beats": false,
+     "wins_of_8": 0,
+     "median_dPSNR_dB": -9.299093655695467
+    },
+    "4": {
+     "beats": false,
+     "wins_of_8": 0,
+     "median_dPSNR_dB": -5.429865419245401
+    },
+    "5": {
+     "beats": false,
+     "wins_of_8": 0,
+     "median_dPSNR_dB": -4.055924986805552
+    },
+    "6": {
+     "beats": false,
+     "wins_of_8": 0,
+     "median_dPSNR_dB": -3.546698148043647
+    }
+   }
+  }
+ },
+ "context_camera_beats_ghost_N=1e7": {
+  "0": {
+   "beats": true,
+   "wins_of_8": 8,
+   "median_dPSNR_dB": 29.542196108518347
+  },
+  "0.5": {
+   "beats": true,
+   "wins_of_8": 8,
+   "median_dPSNR_dB": 20.462149928472783
+  },
+  "1": {
+   "beats": true,
+   "wins_of_8": 8,
+   "median_dPSNR_dB": 13.425202214733035
+  },
+  "2": {
+   "beats": true,
+   "wins_of_8": 8,
+   "median_dPSNR_dB": 7.023169605311497
+  },
+  "3": {
+   "beats": true,
+   "wins_of_8": 8,
+   "median_dPSNR_dB": 4.606821521192081
+  },
+  "4": {
+   "beats": true,
+   "wins_of_8": 8,
+   "median_dPSNR_dB": 3.619833123912472
+  },
+  "5": {
+   "beats": true,
+   "wins_of_8": 8,
+   "median_dPSNR_dB": 3.165735509538341
+  },
+  "6": {
+   "beats": true,
+   "wins_of_8": 8,
+   "median_dPSNR_dB": 2.95284558003409
+  }
+ },
+ "runtime_s": 13.0654137134552,
+ "return_only_exploratory": true
+}

@@ -1,0 +1,5 @@
+sha256: 99db809c434f3a0c748e3bf328f2a8453492f0eaf83b7966a29e58b4179a0276
+file: experiments/tunnel/ADR-012.prereg-frozen.md
+frozen_at: 2026-09-28T04:38:07.9005211+02:00
+git_head: 2747e946a9e2391a0659d630fe73df22cae31404
+note: frozen before any ADR-012 code was written or run; section 9 is filled only in docs/adr/ADR-012-tunnel-nlos-ghost.md

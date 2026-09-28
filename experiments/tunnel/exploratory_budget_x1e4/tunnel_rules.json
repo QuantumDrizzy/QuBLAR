@@ -1,0 +1,92 @@
+{
+ "dir": "experiments\\tunnel\\exploratory_budget_x1e4",
+ "budgets": [
+  "1e+14",
+  "1e+15",
+  "1e+16",
+  "1e+17"
+ ],
+ "exploratory_run": true,
+ "frozen_T": {
+  "A4": {
+   "pass_": true,
+   "detected_at_V5": []
+  }
+ },
+ "exploratory_whitened_T": {
+  "A4": {
+   "pass_": true,
+   "detected_at_V5": []
+  }
+ },
+ "V_break": {
+  "frozen_T": {
+   "person|far|P1|B=1e+14": "none",
+   "person|far|P1|B=1e+15": "none",
+   "person|far|P1|B=1e+16": "none",
+   "person|far|P1|B=1e+17": "none",
+   "person|far|P2|B=1e+14": "none",
+   "person|far|P2|B=1e+15": "none",
+   "person|far|P2|B=1e+16": "inf",
+   "person|far|P2|B=1e+17": "inf",
+   "person|near|P1|B=1e+14": "none",
+   "person|near|P1|B=1e+15": "none",
+   "person|near|P1|B=1e+16": "none",
+   "person|near|P1|B=1e+17": "none",
+   "person|near|P2|B=1e+14": "none",
+   "person|near|P2|B=1e+15": "none",
+   "person|near|P2|B=1e+16": "inf",
+   "person|near|P2|B=1e+17": "50",
+   "vehicle|far|P1|B=1e+14": "none",
+   "vehicle|far|P1|B=1e+15": "none",
+   "vehicle|far|P1|B=1e+16": "none",
+   "vehicle|far|P1|B=1e+17": "none",
+   "vehicle|far|P2|B=1e+14": "none",
+   "vehicle|far|P2|B=1e+15": "none",
+   "vehicle|far|P2|B=1e+16": "none",
+   "vehicle|far|P2|B=1e+17": "none",
+   "vehicle|near|P1|B=1e+14": "none",
+   "vehicle|near|P1|B=1e+15": "none",
+   "vehicle|near|P1|B=1e+16": "none",
+   "vehicle|near|P1|B=1e+17": "none",
+   "vehicle|near|P2|B=1e+14": "none",
+   "vehicle|near|P2|B=1e+15": "none",
+   "vehicle|near|P2|B=1e+16": "none",
+   "vehicle|near|P2|B=1e+17": "inf"
+  },
+  "exploratory_whitened_T": {
+   "person|far|P1|B=1e+14": "none",
+   "person|far|P1|B=1e+15": "none",
+   "person|far|P1|B=1e+16": "none",
+   "person|far|P1|B=1e+17": "none",
+   "person|far|P2|B=1e+14": "none",
+   "person|far|P2|B=1e+15": "none",
+   "person|far|P2|B=1e+16": "inf",
+   "person|far|P2|B=1e+17": "50",
+   "person|near|P1|B=1e+14": "none",
+   "person|near|P1|B=1e+15": "none",
+   "person|near|P1|B=1e+16": "none",
+   "person|near|P1|B=1e+17": "none",
+   "person|near|P2|B=1e+14": "none",
+   "person|near|P2|B=1e+15": "none",
+   "person|near|P2|B=1e+16": "50",
+   "person|near|P2|B=1e+17": "20",
+   "vehicle|far|P1|B=1e+14": "none",
+   "vehicle|far|P1|B=1e+15": "none",
+   "vehicle|far|P1|B=1e+16": "none",
+   "vehicle|far|P1|B=1e+17": "none",
+   "vehicle|far|P2|B=1e+14": "none",
+   "vehicle|far|P2|B=1e+15": "none",
+   "vehicle|far|P2|B=1e+16": "none",
+   "vehicle|far|P2|B=1e+17": "inf",
+   "vehicle|near|P1|B=1e+14": "none",
+   "vehicle|near|P1|B=1e+15": "none",
+   "vehicle|near|P1|B=1e+16": "none",
+   "vehicle|near|P1|B=1e+17": "none",
+   "vehicle|near|P2|B=1e+14": "none",
+   "vehicle|near|P2|B=1e+15": "none",
+   "vehicle|near|P2|B=1e+16": "inf",
+   "vehicle|near|P2|B=1e+17": "50"
+  }
+ }
+}

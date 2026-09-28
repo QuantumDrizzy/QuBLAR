@@ -1,0 +1,11 @@
+budget_mult=1
+paths_per_relay=1048576
+seeds=8
+bins=1280
+bin_ps=100.0
+t0_ns=67.8688
+relays=1024
+vox=100x50x50
+render_s=20.98
+recon_s=15.83
+wall_s=38.13
