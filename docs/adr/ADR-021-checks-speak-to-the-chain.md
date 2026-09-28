@@ -51,3 +51,16 @@ is not a measurement*.
 - No unregistered failure is signed.
 - No batch from a dirty tree.
 - No number on the QμBLAR page without a ledger id.
+
+## 5. First result (2026-09-29)
+
+- **The batch.** `python tools/ledger_batch.py` at `d96b893` built and ran the five checks one at
+  a time and produced 117 entries. Every number reproduced ADR-019 §5 exactly: 11/11, 37
+  undecided, 47 with 16 U2 misses, 3 off the ore, 20 on the ore with 17 U2 misses, 85
+  undecided, and 4 correct.
+- **One FAIL, registered.** `qublar/check_fusion/muons/off_truth` = 3 was signed as FAIL with its
+  prereg reference. Nothing else failed.
+- **The signature.** Unibit chain block 3 (`c45868c3…`) holds all of it, plus the pyramid
+  cloud: 2,097,152 bytes, SHA-256 `f86a406a6510…`.
+- **The page.** The Unibit QμBLAR page draws the cloud in its Bits tab after verifying the hash
+  in the browser. One flipped byte in the served file was refused with both hashes shown.
