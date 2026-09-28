@@ -1,0 +1,7 @@
+ADR-015 R1(b): integer engine vs anneal_branch, frozen schedule, seeds 1..8
+  G1: 8/8 identical, best cut 11613 (committed 11613), sha matches, consistent yes -> ok
+  G2: 8/8 identical, best cut 11617 (committed 11617), sha matches, consistent yes -> ok
+  G3: 8/8 identical, best cut 11621 (committed 11621), sha matches, consistent yes -> ok
+  G4: 8/8 identical, best cut 11646 (committed 11646), sha matches, consistent yes -> ok
+  G5: 8/8 identical, best cut 11616 (committed 11616), sha matches, consistent yes -> ok
+R1(b): 40 of 40 assignments identical -> PASS

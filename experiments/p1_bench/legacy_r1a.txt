@@ -1,0 +1,11 @@
+ADR-015 R1(a): legacy-mode output SHA-256, gset_bench data\gset\G<k>, frozen schedule
+G1 pre-change 9bfde93f963a673a343ae0362c9ff7e6f5e423db8d4a545697e21573ab7bb6d5
+G1 post-change(build\gset_bench.exe) 9bfde93f963a673a343ae0362c9ff7e6f5e423db8d4a545697e21573ab7bb6d5  identical=True
+G2 pre-change 1145b3aae205f5d45d29a5b853733daeee4da86afde7600a9745000b7bf1b9a0
+G2 post-change(build\gset_bench.exe) 1145b3aae205f5d45d29a5b853733daeee4da86afde7600a9745000b7bf1b9a0  identical=True
+G3 pre-change 02f697a5e002d755ace915d733677884ea71cae74feb090ed7c55ecf6220860f
+G3 post-change(build\gset_bench.exe) 02f697a5e002d755ace915d733677884ea71cae74feb090ed7c55ecf6220860f  identical=True
+G4 pre-change 0194c31b68fe7c936dccafcada2ba100c258e8147c06cff0d904245dae979ad9
+G4 post-change(build\gset_bench.exe) 0194c31b68fe7c936dccafcada2ba100c258e8147c06cff0d904245dae979ad9  identical=True
+G5 pre-change 7af2a66fcbcb3ee92a2b1b017422f670ca9c728dc12b50a4376cb710fc5a1ef3
+G5 post-change(build\gset_bench.exe) 7af2a66fcbcb3ee92a2b1b017422f670ca9c728dc12b50a4376cb710fc5a1ef3  identical=True

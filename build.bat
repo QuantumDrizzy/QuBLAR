@@ -60,6 +60,11 @@ nvcc %FLAGS% -o build\check_mine.exe src\check_mine.cu || exit /b 1
 echo [11/11] check_ahead
 nvcc %FLAGS% -o build\check_ahead.exe src\check_ahead.cu || exit /b 1
 
+rem Host-only harness (ADR-015): the integer Ising path and the Gset/K2000 bench. It holds no
+rem device code, so check.bat's sm_120 cuobjdump loop does not list it.
+echo [12/12] gset_bench
+nvcc %FLAGS% -I src -o build\gset_bench.exe tools\gset_bench.cu || exit /b 1
+
 echo.
 echo built into build\
 endlocal

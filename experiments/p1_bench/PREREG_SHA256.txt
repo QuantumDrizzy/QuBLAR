@@ -1,0 +1,5 @@
+sha256: d0f95bffd6ef3baef6c1b321984765cd60e6e5a460df91c5b4d3386765f8dd89
+file: experiments/p1_bench/ADR-015.prereg-frozen.md
+frozen_at: 2026-09-28T05:52:12.2000798+02:00
+git_head: 7308c6207c268c05a2e2b3616c9ef11a5d1a4b90
+note: frozen before any P1 harness code was written or run; section 9 is filled only in docs/adr/ADR-015-p1-bench-harness.md

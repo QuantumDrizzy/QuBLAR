@@ -1,0 +1,246 @@
+arch sm_120 confirmed in all binaries
+QuBLAR Phase 1 -- CUDA BVH traversal
+
+  analytic tilted plane, 17 rays                 PASS  max |error| = 0.000001 m
+  surface normal matches the known tilt          PASS  max |error| = 0.000000
+  [box: 432 triangles, 223 BVH nodes]
+  the BVH actually branches                      PASS  223 nodes, 112 leaves
+  no leaf exceeds the maximum                    PASS  largest holds 4
+  every triangle referenced exactly once         PASS  432 of 432
+  BVH agrees with brute force on 20000 rays      PASS  0 disagreements
+  distances identical where both hit             PASS  max |delta| = 0.000000 m
+  no ray escapes a closed box (1M rays)          PASS  0 leaks of 1048576, 110592 triangles
+
+all checks passed
+
+QuBLAR Phase 1 -- LiDAR sensor model
+
+  returned energy matches rho/d^2                PASS  rel = 4.593e-05 
+  peak sits at the analytic range                PASS  peak = 9.998e+00 m
+  waveform equals the transmitted pulse          PASS  max dev / peak = 1.298e-04 
+  energy is independent of sub-bin phase         PASS  spread = 2.655e-05 
+  energy falls as 1/d^2 over 5-40 m              PASS  spread of E*d^2 = 6.192e-05 
+  energy falls as cos(theta) to 60 deg           PASS  spread of E/cos = 1.449e-05 
+  half-lit footprint returns half the energy     PASS  |w-0.5| = 0.000060
+  refining the estimate reduces the error        PASS  4:0.4971 8:0.4998 16:0.5000 32:0.5004 64:0.4999   (4 -> 64: 48.983639x)
+  a step edge produces two returns               PASS  2 returns
+  both returns sit at their analytic ranges      PASS  max |delta| = 1.144e-05 m
+  the footprint splits evenly across the edge    PASS  max |w-0.5| = 6.014e-05 
+  [near/far return ratio expected 1.440 from 1/d^2 alone]
+
+all checks passed
+
+
+QuBLAR Phase 3 -- photon counting and reconstruction
+
+  block scan matches a host prefix sum           PASS  max rel = 0 
+  counts follow the rate when nothing blocks     PASS  max |z| = 3.507 , 2048 bins
+  counts follow the first-arrival law            PASS  max |z| = 3.028 , 341 bins
+  the tail stops carrying counts once it has fired PASS  341 testable bins against 2048 with nothing blocking
+  pile-up only ever suppresses later bins        PASS  ratio is monotone
+  the scan actually straddles the edge           PASS  20 of 96 beams see two surfaces
+
+  input                algorithm            detect false/bm     bias m     rmse m
+  ------------------------------------------------------------------------------
+  linear waveform      peak pick             82.8%     0.00    +0.0021     0.0048
+                       matched filter        94.0%     0.00    +0.0022     0.0048
+                       greedy deconvolve     94.0%     0.00    +0.0000     0.0001
+  photon counts        peak pick             82.8%     0.00    -0.0393     0.0409
+                       matched filter        93.1%     0.00    -0.0263     0.0272
+                       greedy deconvolve     93.1%     0.00    -0.0332     0.0344
+  counts + Coates      peak pick             82.8%     0.00    +0.0021     0.0048
+                       matched filter        94.0%     0.00    +0.0022     0.0048
+                       greedy deconvolve     94.0%     0.00    -0.0000     0.0009
+
+  the noiseless waveform is essentially unbiased PASS  bias = 4.362e-05 m
+  pile-up biases photon ranges short             PASS  bias = -0.03321 m
+  Coates correction reduces that bias            PASS  raw = -0.03321 m -> corrected = -1.413e-05 m
+  multi-return methods beat the single-return control PASS  peak = 82.76 % vs greedy = 93.97 %
+  greedy deconvolve on raw counts, swept over photon budget
+  signal/pl  ambient      detect false/bm     bias m     rmse m
+  --------------------------------------------------------------
+  0.0005     1.00           0.0%     0.00    +0.0000     0.0000
+  0.0020     1.00           0.0%     0.00    +0.0000     0.0000
+  0.0100     1.00          85.3%     0.00    -0.0007     0.0076
+  0.0500     1.00          93.1%     0.07    -0.0017     0.0042
+  0.5000     1.00          94.8%     0.18    -0.0090     0.0096
+  2.0000     1.00          93.1%     0.00    -0.0332     0.0345
+  10.0000    1.00          87.9%     0.00    -0.0889     0.0907
+
+  detection degrades at the starved end          PASS  lowest flux = 0 % vs best = 94.83 %
+  pile-up bias grows with flux                   PASS  largest bias = 0.0889 m
+
+all checks passed
+
+
+QuBLAR Phase 3b -- multi-bounce transport and NLOS
+
+  the wall return arrives at 2|p-s|/c            PASS  path error = 0.0001922 m
+  the hidden patch returns light at all          PASS  energy = 8.345e-05 
+  the hidden return arrives at 2(|p-s|+r)/c      PASS  path error = 0.01004 m, t = 12.96 ns
+
+  hidden-patch energy against range
+  r (m)      energy         E*r^4          ratio     
+  ----------------------------------------------------
+  0.300      4.4646e-02     3.6163e-04     1.000     
+  0.450      8.8756e-03     3.6396e-04     1.006     
+  0.600      2.8084e-03     3.6396e-04     1.006     
+  0.750      1.1591e-03     3.6674e-04     1.014     
+
+  hidden-object signal falls as 1/r^4            PASS  spread of E*r^4 = 0.01402 
+  the voxel grid is matched to the pulse         PASS  worst voxel path error / pulse sigma = 1.841 
+  hidden object at   (+0.300, -0.200, +0.550)
+  reconstructed at   (+0.289, -0.195, +0.554)   voxel 1.6 cm
+
+  the hidden object is located from the wall alone PASS  error = 1.252 cm, voxel = 1.562 cm
+  an empty volume produces no such peak          PASS  with object = 8.321e-05  vs empty = 0 
+
+all checks passed
+
+
+QuBLAR Phase 5 -- muon tomography (ADR-006)
+
+  A. the marcher
+  the slab's optical depth is mu*L               PASS  tau = 1.84 , mu*L = 1.84 
+      b= 0.0 m: marched 4.510214, voxelized column 4.510208 (continuous 99.000)
+      b=10.0 m: marched 3.958461, voxelized column 3.958453 (continuous 86.913)
+      b=20.0 m: marched 3.406707, voxelized column 3.406699 (continuous 74.826)
+      b=30.0 m: marched 2.854953, voxelized column 2.854944 (continuous 62.739)
+      b=40.0 m: marched 2.303199, voxelized column 2.303189 (continuous 50.652)
+      b=50.0 m: marched 1.751435, voxelized column 1.751435 (continuous 38.565)
+      b=60.0 m: marched 1.199680, voxelized column 1.199680 (continuous 26.478)
+      b=70.0 m: marched 0.647925, voxelized column 0.647925 (continuous 14.391)
+      b=80.0 m: marched 0.096171, voxelized column 0.096171 (continuous 2.304)
+  vertical columns match the voxelized chord     PASS  worst rel err = 4.037e-06 
+
+  B. Beer-Lambert transmission
+  detected fraction follows exp(-tau)            PASS  worst deviation = 2.108  sigma
+
+  C. the sky
+  open-sky bins follow the cos^2 law             PASS  worst deviation = 2.582  sigma
+
+  D. batch statistics
+  batch counts are Binomial(N, T)                PASS  var ratio = 0.9873  over bins = 860 
+
+  E. the Big Void
+    void truth          (+0.0, +0.0, +77.0) m, 30 m long in y, 32 voxels
+    MLEM, 1 view        deficit peak (+1.0, +3.0, +47.0) m, 30.0 m off; void mean mu 0.0438 /m
+    MLEM, 3 views       deficit peak (+1.0, +3.0, +47.0) m, 30.0 m off; void mean mu 0.0420 /m
+    BP,   3 views       void mean mu 2.1684 /m (control, reported only)
+    no-void model       void mean mu 0.0464 /m (1 view) | 0.0463 /m (3 views)
+  MLEM with 3 views localises the void           KNOWN LIMIT  peak off by = 30.02  m (apex artifact)
+  crossing views deepen the void's deficit       PASS  3 views = 0.04203  vs 1 view = 0.04375  /m
+  the void's voxels reconstruct below the model  PASS  with void = 0.04203  vs no void = 0.04634  /m
+
+    mu(z) at the void's column, x = y = 0 (1 view | 3 views | no-void model):
+      z= 61.0 m   0.0463 | 0.0447 | 0.0457 /m
+      z= 65.0 m   0.0453 | 0.0431 | 0.0440 /m
+      z= 69.0 m   0.0449 | 0.0460 | 0.0474 /m
+      z= 73.0 m   0.0448 | 0.0445 | 0.0453 /m
+      z= 77.0 m   0.0420 | 0.0435 | 0.0459 /m   <- void
+      z= 81.0 m   0.0421 | 0.0428 | 0.0450 /m
+      z= 85.0 m   0.0442 | 0.0493 | 0.0508 /m
+      z= 89.0 m   0.0491 | 0.0441 | 0.0448 /m
+      z= 93.0 m   0.0510 | 0.0547 | 0.0545 /m
+      z= 97.0 m   0.0545 | 0.0429 | 0.0414 /m
+      z=101.0 m   0.0498 | 0.0491 | 0.0477 /m
+
+  F. an empty pyramid, same three views
+  an empty pyramid shows no void deficit         PASS  empty = 0.04634  /m vs rock mu = 0.046  /m
+
+all checks passed
+
+
+QuBLAR -- binary branches (ADR-007)
+
+  A. the oracle
+  annealer reaches the exact ground state            PASS  annealed = 7.404, exact (2^16) = 7.404
+
+  exposure: 134217728 candidates per chamber (2^27), 6 exposures in 5.7 s
+
+  B. the Big Void (lambda = 2.00, kappa = ln((1-p0)/p0) = 6.91, p0 = 0.001, 16 branches)
+    306328 variables, 75600 rays, 3829376 ray-voxel entries (built in 0.9 s)
+    16 branches annealed in 7.0 s on 16 threads
+    truth: 32 void voxels; found 'does not exist': 11 (11 correct), undecided: 37
+    centroid of the found void (-0.1, -5.7, +77.0) m, 0.1 m from the void's axis
+    baseline (ADR-006 MLEM, same data): deficit peak 30.0 m off
+    evidence budget for the true void: data +772.9 nats, prior +421.0 nats -> the prior is outweighed
+  2^26 and above: the data pay for the void          PASS  data nats = 772.9, prior nats = 421
+  binary branches localise the void                  PASS  distance m = 0.09091, IoU = 0.3438
+
+  C. the empty pyramid, same seeds, same priors
+    'does not exist' voxels: 0, undecided: 0
+  no void is found where there is none               PASS  false voids = 0
+
+  D. the void run with the prior off (lambda = kappa = 0)
+    evidence budget for the true void: data +772.9 nats, prior +421.0 nats -> the prior is outweighed
+    of 11 'does not exist' voxels, 0 stay above p = 0.5 without the prior (data-driven); 11 need it (prior-driven)
+    'exists' only because of the prior (p > 0.5 without it): 434 voxels
+    mean p_void over the true void: 0.789 with the prior, 0.074 without
+
+  E. calibration against truth
+    p in [0.0, 0.1):  306280 voxels, truly void 0.000
+    p in [0.1, 0.5):      16 voxels, truly void 0.000
+    p in [0.5, 0.9):      21 voxels, truly void 1.000
+    p in [0.9, 1.0):      11 voxels, truly void 1.000
+
+  F. efficiency (reference: 16 branches, 200 + 50 sweeps)
+    branches  sweeps            time s   work (%)     found same set as reference
+    16        100 + 25             3.5      50.0%    4 (4 ok) no
+    16        50 + 15              1.9      26.0%    0 (0 ok) no
+    8         200 + 50             5.7      50.0%    9 (9 ok) no
+    8         100 + 25             2.8      25.0%    4 (4 ok) no
+    8         50 + 15              1.5      13.0%    0 (0 ok) no
+    4         100 + 25             3.1      12.5%    4 (4 ok) no
+
+  G. freezing provable rock (margin 10 nats)
+    variables annealed: 234093 of 306328 (76.42%), 24 freeze rounds, 0.16 s to prove
+    16 branches: 3.59 s (reference 6.9 s); found 8 (8 correct)
+    Jaccard vs reference: frozen run 0.727 | same engine, other seeds 0.364
+  freezing keeps the answer within seed-to-seed spread PASS  frozen = 0.7273, seeds = 0.3636
+  ROI QUBO equals the full energy (8 random x)       PASS  worst abs err = 1.36e-10
+
+    exported build\ising_out_* (p_void grids, truth, branches, meta)
+
+all checks passed
+
+QuBLAR -- gset_bench self-check (ADR-015)
+  the loader refuses 5 malformed inputs                PASS  5 of 5 refused
+  a missing weight is +1, a signed weight is kept      PASS  sum of weights -6
+  integer energy exact on all 2^16 states, 3 K16       PASS  0 mismatches over 196605 flips
+    engine best of 8 (B10) / exact optimum: 10622/13777, 12434/12434, 5050/6376 (reported, not decisive: < 0.99 somewhere)
+  integer engine = anneal_branch, synthetic +1 graph   PASS  4 of 4 seeds identical
+  G1: integer engine = anneal_branch, 8 seeds          PASS  8 of 8 identical
+  G1: best cut and assignment hash as committed        PASS  cut 11613
+
+all checks passed
+
+QuBLAR Phase 2 -- CUDA BVH against RT cores
+
+  RT core version 40, 1048576 rays per launch
+
+  triangles rays         bvh Mray/s   optix Mray/s speedup   edge ties   
+  --------------------------------------------------------------------------
+  432       coherent     1923.7       3456.9       1.80      21          
+  432       incoherent   570.8        3243.1       5.68      1           
+            [build]      host BVH 223 nodes = 7136 B, depth 8 of 32, optix build 0.14 ms
+  3072      coherent     1555.1       3616.8       2.33      21          
+  3072      incoherent   473.2        3048.5       6.44      3           
+            [build]      host BVH 1567 nodes = 50144 B, depth 12 of 32, optix build 0.19 ms
+  12288     coherent     1414.5       3732.5       2.64      21          
+  12288     incoherent   438.1        2831.7       6.46      3           
+            [build]      host BVH 6255 nodes = 200160 B, depth 14 of 32, optix build 0.22 ms
+  49152     coherent     1172.4       3655.1       3.12      21          
+  49152     incoherent   424.5        2751.3       6.48      4           
+            [build]      host BVH 25111 nodes = 803552 B, depth 17 of 32, optix build 0.57 ms
+  110592    coherent     926.4        3637.3       3.93      21          
+  110592    incoherent   415.7        2645.1       6.36      4           
+            [build]      host BVH 56703 nodes = 1814496 B, depth 19 of 32, optix build 0.68 ms
+
+  watertightness through RT cores
+    no ray escapes a closed box                  PASS  0 leaks of 30000
+
+tracers agree
+
+
+all green

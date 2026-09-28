@@ -24,6 +24,7 @@ build\check_detector.exe || exit /b 1
 build\check_transient.exe || exit /b 1
 build\check_muon.exe     || exit /b 1
 build\check_ising.exe    || exit /b 1
+build\gset_bench.exe --check data\gset || exit /b 1
 build\bench_trace.exe build\optix_programs.optixir || exit /b 1
 
 echo.

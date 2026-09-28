@@ -1,0 +1,45 @@
+G1: n 800 m 19176, sha ok, loaded
+  G1    B1   runs 64/64  best 11624 (target 11624, gap 0.000000%)  p 0.015625  t 0.015172 s  TTS99 4.436587 s [1.405544, inf]  consistent yes  (0.1 s)
+  G1    B10  runs 64/64  best 11624 (target 11624, gap 0.000000%)  p 0.453125  t 0.123404 s  TTS99 0.941613 s [0.654416, 1.415699]  consistent yes  (0.5 s)
+  G1    B100 runs 16/16  best 11624 (target 11624, gap 0.000000%)  p 0.937500  t 1.130648 s  TTS99 1.877966 s [1.114911, 3.124385]  consistent yes  (1.2 s)
+G2: n 800 m 19176, sha ok, loaded
+  G2    B1   runs 64/64  best 11617 (target 11620, gap -0.025818%)  p 0.000000  t 0.013709 s  TTS99 inf s [inf, inf]  consistent yes  (0.1 s)
+  G2    B10  runs 64/64  best 11620 (target 11620, gap 0.000000%)  p 0.015625  t 0.121703 s  TTS99 35.588702 s [11.383768, inf]  consistent yes  (0.5 s)
+  G2    B100 runs 16/16  best 11620 (target 11620, gap 0.000000%)  p 0.187500  t 1.175950 s  TTS99 26.081030 s [11.485936, inf]  consistent yes  (1.2 s)
+G3: n 800 m 19176, sha ok, loaded
+  G3    B1   runs 64/64  best 11621 (target 11622, gap -0.008604%)  p 0.000000  t 0.011026 s  TTS99 inf s [inf, inf]  consistent yes  (0.1 s)
+  G3    B10  runs 64/64  best 11622 (target 11622, gap 0.000000%)  p 0.187500  t 0.115776 s  TTS99 2.567764 s [1.573655, 5.331726]  consistent yes  (0.5 s)
+  G3    B100 runs 16/16  best 11622 (target 11622, gap 0.000000%)  p 0.562500  t 1.145410 s  TTS99 6.380724 s [3.160633, 14.027237]  consistent yes  (1.2 s)
+G4: n 800 m 19176, sha ok, loaded
+  G4    B1   runs 64/64  best 11646 (target 11646, gap 0.000000%)  p 0.046875  t 0.014157 s  TTS99 1.357982 s [0.575560, inf]  consistent yes  (0.1 s)
+  G4    B10  runs 64/64  best 11646 (target 11646, gap 0.000000%)  p 0.046875  t 0.110112 s  TTS99 10.562196 s [4.404266, inf]  consistent yes  (0.5 s)
+  G4    B100 runs 16/16  best 11646 (target 11646, gap 0.000000%)  p 0.062500  t 1.169285 s  TTS99 83.434739 s [25.684678, inf]  consistent yes  (1.2 s)
+G5: n 800 m 19176, sha ok, loaded
+  G5    B1   runs 64/64  best 11630 (target 11631, gap -0.008598%)  p 0.000000  t 0.012926 s  TTS99 inf s [inf, inf]  consistent yes  (0.1 s)
+  G5    B10  runs 64/64  best 11631 (target 11631, gap 0.000000%)  p 0.140625  t 0.110783 s  TTS99 3.366374 s [1.951904, 7.961782]  consistent yes  (0.5 s)
+  G5    B100 runs 16/16  best 11631 (target 11631, gap 0.000000%)  p 0.375000  t 1.180804 s  TTS99 11.569700 s [5.534748, 26.862376]  consistent yes  (1.2 s)
+G22: n 2000 m 19990, sha ok, loaded
+  G22   B1   runs 64/64  best 13323 (target 13359, gap -0.269481%)  p 0.000000  t 0.028458 s  TTS99 inf s [inf, inf]  consistent yes  (0.1 s)
+  G22   B10  runs 64/64  best 13358 (target 13359, gap -0.007486%)  p 0.000000  t 0.270625 s  TTS99 inf s [inf, inf]  consistent yes  (1.2 s)
+  G22   B100 runs 16/16  best 13358 (target 13359, gap -0.007486%)  p 0.000000  t 2.687080 s  TTS99 inf s [inf, inf]  consistent yes  (2.8 s)
+G55: n 5000 m 12498, sha ok, loaded
+  G55   B1   runs 64/64  best 10226 (target 10299, gap -0.708807%)  p 0.000000  t 0.062736 s  TTS99 inf s [inf, inf]  consistent yes  (0.3 s)
+  G55   B10  runs 64/64  best 10279 (target 10299, gap -0.194194%)  p 0.000000  t 0.615292 s  TTS99 inf s [inf, inf]  consistent yes  (2.6 s)
+  G55   B100 runs 16/16  best 10295 (target 10299, gap -0.038839%)  p 0.000000  t 6.004436 s  TTS99 inf s [inf, inf]  consistent yes  (6.2 s)
+G60: n 7000 m 17148, sha ok, loaded
+  G60   B1   runs 64/64  best 14080 (target 14188, gap -0.761207%)  p 0.000000  t 0.088310 s  TTS99 inf s [inf, inf]  consistent yes  (0.4 s)
+  G60   B10  runs 64/64  best 14156 (target 14188, gap -0.225543%)  p 0.000000  t 0.859210 s  TTS99 inf s [inf, inf]  consistent yes  (3.5 s)
+  G60   B100 runs 16/16  best 14178 (target 14188, gap -0.070482%)  p 0.000000  t 8.503050 s  TTS99 inf s [inf, inf]  consistent yes  (8.7 s)
+G70: n 10000 m 9999, sha ok, loaded
+  G70   B1   runs 64/64  best 9448 (target 9595, gap -1.532048%)  p 0.000000  t 0.119374 s  TTS99 inf s [inf, inf]  consistent yes  (0.5 s)
+  G70   B10  runs 64/64  best 9546 (target 9595, gap -0.510683%)  p 0.000000  t 1.154836 s  TTS99 inf s [inf, inf]  consistent yes  (4.8 s)
+  G70   B100 runs 16/16  best 9571 (target 9595, gap -0.250130%)  p 0.000000  t 11.236858 s  TTS99 inf s [inf, inf]  consistent yes  (11.4 s)
+G81: n 20000 m 40000, sha ok, loaded
+  G81   B1   runs 64/64  best 13822 (target 14060, gap -1.692745%)  p 0.000000  t 0.227628 s  TTS99 inf s [inf, inf]  consistent yes  (1.0 s)
+  G81   B10  runs 64/64  best 13900 (target 14060, gap -1.137980%)  p 0.000000  t 2.225608 s  TTS99 inf s [inf, inf]  consistent yes  (9.1 s)
+  G81   B100 runs 16/16  best 13968 (target 14060, gap -0.654339%)  p 0.000000  t 22.216931 s  TTS99 inf s [inf, inf]  consistent yes  (22.5 s)
+K2000: n 2000 m 1999000, sha ok, loaded
+  K2000 B1   runs 64/64  best 32219 (target 33337, gap -3.353631%)  p 0.000000  t 0.049131 s  TTS99 inf s [inf, inf]  consistent yes  (0.3 s)
+  K2000 B10  runs 64/64  best 32630 (target 33337, gap -2.120767%)  p 0.000000  t 0.314827 s  TTS99 inf s [inf, inf]  consistent yes  (1.4 s)
+  K2000 B100 runs 16/16  best 32906 (target 33337, gap -1.292858%)  p 0.000000  t 2.980417 s  TTS99 inf s [inf, inf]  consistent yes  (3.2 s)
+instances listed 11, loaded with matching hash and counts 11; cells complete 33 of 33; inconsistent runs 0
