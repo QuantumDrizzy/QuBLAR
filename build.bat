@@ -78,6 +78,10 @@ nvcc %FLAGS% -o build\check_engine.exe src\check_engine.cu || exit /b 1
 echo [15/15] check_gravity
 nvcc %FLAGS% -o build\check_gravity.exe src\check_gravity.cu || exit /b 1
 
+rem ADR-018: muons + gravity on one field (L5, first step).
+echo [16/16] check_fusion
+nvcc %FLAGS% -o build\check_fusion.exe src\check_fusion.cu || exit /b 1
+
 echo.
 echo built into build\
 endlocal
