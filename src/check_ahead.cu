@@ -13,6 +13,7 @@
 #include "muon_recon.hpp"
 #include "muon_replica.hpp"
 #include "ising_recon.hpp"
+#include "run_talk.hpp"
 
 #include <algorithm>
 #include <chrono>
@@ -123,6 +124,7 @@ static void fill_domain(const std::vector<float>& host_solid, std::vector<char>&
 }
 
 int main(int argc, char** argv) {
+    RunTalk talk = RunTalk::begin("check_ahead");
     std::printf("\nQuBLAR -- check_ahead (cavity %.0f m ahead, traversable policy)\n\n",
                 kAheadM);
     std::printf("  policy: Exists = traversable; Undecided|NotThere = not traversable\n");
@@ -155,8 +157,12 @@ int main(int argc, char** argv) {
         truth[v] = domain[v] && host_cav[v] < kMuRock * 0.5f;
 
     auto t0 = std::chrono::steady_clock::now();
-    MuonBinnedData seen = expose(m_cav, kAheadChamber, 1u, imaging_sky(), candidates);
-    MuonBinnedData seen0 = expose(m_empty, kAheadChamber, 2u, imaging_sky(), candidates);
+    MuonBinnedData seen, seen0;
+    {
+        Tick gpu(talk, true);
+        seen = expose(m_cav, kAheadChamber, 1u, imaging_sky(), candidates);
+        seen0 = expose(m_empty, kAheadChamber, 2u, imaging_sky(), candidates);
+    }
     std::printf("  exposure: 2^%d = %d candidates (%.1f s)\n", log2e, candidates,
                 seconds_since(t0));
 
@@ -175,7 +181,11 @@ int main(int argc, char** argv) {
                 data_pay ? "data pay" : "DECLINE (prior wins)");
 
     t0 = std::chrono::steady_clock::now();
-    const std::vector<float> pv = branch_fractions(prob, posterior, kBranches, n_threads);
+    std::vector<float> pv;
+    {
+        Tick cpu(talk, false);
+        pv = branch_fractions(prob, posterior, kBranches, n_threads);
+    }
     std::printf("    %d branches in %.1f s\n", kBranches, seconds_since(t0));
 
     int truth_n = 0, hit = 0, n_block = 0, n_clear_on_truth = 0;
@@ -234,7 +244,11 @@ int main(int argc, char** argv) {
     // ---- empty control -------------------------------------------------------
     std::printf("\n  B. control, no cavity\n");
     const BinaryProblem prob0 = build_binary_problem(m_model, views0, domain, kLambda, kappa);
-    const std::vector<float> pv0 = branch_fractions(prob0, posterior, kBranches, n_threads);
+    std::vector<float> pv0;
+    {
+        Tick cpu(talk, false);
+        pv0 = branch_fractions(prob0, posterior, kBranches, n_threads);
+    }
     int false_not = 0, clear_where_cavity = 0, block_where_cavity = 0, cavity_slots = 0;
     for (int i = 0; i < prob0.n_vars(); ++i) {
         const Bit b = classify(pv0[i]);
@@ -260,6 +274,8 @@ int main(int argc, char** argv) {
 
     cudaFree(d_cav);
     cudaFree(d_empty);
+    const char* verdict = failures == 0 ? "PASS" : "FAIL";
     std::printf("\n%s\n\n", failures == 0 ? "all checks passed" : "FAILURES PRESENT");
+    talk.end(verdict);
     return failures == 0 ? 0 : 1;
 }

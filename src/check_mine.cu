@@ -16,6 +16,7 @@
 #include "muon_recon.hpp"
 #include "muon_replica.hpp"
 #include "ising_recon.hpp"
+#include "run_talk.hpp"
 
 #include <algorithm>
 #include <chrono>
@@ -144,7 +145,7 @@ struct BodyResult {
     bool ok = false;
 };
 
-static BodyResult run_body(float ore_half, int candidates, unsigned n_threads) {
+static BodyResult run_body(float ore_half, int candidates, unsigned n_threads, RunTalk& talk) {
     BodyResult R;
     R.half = ore_half;
     R.candidates = candidates;
@@ -165,9 +166,12 @@ static BodyResult run_body(float ore_half, int candidates, unsigned n_threads) {
         truth[v] = domain[v] && host_ore[v] > kMuRock * 1.01f;
 
     std::vector<MuonBinnedData> seen, seen0;
-    for (int c = 0; c < 3; ++c) {
-        seen.push_back(expose(m_ore, kMineChambers[c], 1u + c, imaging_sky(), candidates));
-        seen0.push_back(expose(m_empty, kMineChambers[c], 1u + c, imaging_sky(), candidates));
+    {
+        Tick gpu(talk, true);
+        for (int c = 0; c < 3; ++c) {
+            seen.push_back(expose(m_ore, kMineChambers[c], 1u + c, imaging_sky(), candidates));
+            seen0.push_back(expose(m_empty, kMineChambers[c], 1u + c, imaging_sky(), candidates));
+        }
     }
     const std::vector<MuonView> views = {{kMineChambers[0], &seen[0]},
                                          {kMineChambers[1], &seen[1]},
@@ -185,7 +189,11 @@ static BodyResult run_body(float ore_half, int candidates, unsigned n_threads) {
     evidence_budget(prob_d, prob, truth, R.gain, R.cost);
     R.data_pay = R.gain > R.cost;
 
-    const std::vector<float> pv = branch_fractions(prob, posterior, kBranches, n_threads);
+    std::vector<float> pv;
+    {
+        Tick cpu(talk, false);
+        pv = branch_fractions(prob, posterior, kBranches, n_threads);
+    }
     double cx = 0, cy = 0, cz = 0;
     for (int i = 0; i < prob.n_vars(); ++i) {
         const int v = prob.var_voxel[i];
@@ -207,7 +215,11 @@ static BodyResult run_body(float ore_half, int candidates, unsigned n_threads) {
 
     const BinaryProblem prob0 =
         build_binary_problem(m_model, views0, domain, kLambda, kappa, 30.0, kAOre);
-    const std::vector<float> pv0 = branch_fractions(prob0, posterior, kBranches, n_threads);
+    std::vector<float> pv0;
+    {
+        Tick cpu(talk, false);
+        pv0 = branch_fractions(prob0, posterior, kBranches, n_threads);
+    }
     for (float p : pv0)
         if (classify(p) == Bit::NotThere) ++R.false_ore;
 
@@ -226,6 +238,7 @@ static BodyResult run_body(float ore_half, int candidates, unsigned n_threads) {
 }
 
 int main(int argc, char** argv) {
+    RunTalk talk = RunTalk::begin("check_mine");
     std::printf("\nQuBLAR -- check_mine (denser ore, declared contrast)\n\n");
     std::printf("  declared: rho_rock = 2.65 g/cm^3 (Lesparre / PDG); "
                 "rho_ore/rho_rock = %.2f; mu_ore = %.4g /m; a_per_metre = %.4g /m\n",
@@ -256,7 +269,7 @@ int main(int argc, char** argv) {
         std::printf("  --- ore half-extent %.1f m (cube ~%.0f m) ---\n", half, 2.0 * half);
         for (int cand : exposures) {
             const auto t0 = std::chrono::steady_clock::now();
-            const BodyResult R = run_body(half, cand, n_threads);
+            const BodyResult R = run_body(half, cand, n_threads, talk);
             const int log2e = int(std::log2(double(cand)) + 0.5);
             std::printf("    exposure 2^%d = %d candidates/chamber (%.1f s)\n", log2e, cand,
                         seconds_since(t0));
@@ -284,6 +297,8 @@ int main(int argc, char** argv) {
         std::printf("\n");
     }
 
+    const char* verdict = failures == 0 ? "PASS" : "FAIL";
     std::printf("%s\n\n", failures == 0 ? "all checks passed" : "FAILURES PRESENT");
+    talk.end(verdict);
     return failures == 0 ? 0 : 1;
 }

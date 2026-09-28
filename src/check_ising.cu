@@ -19,6 +19,7 @@
 #include "muon_recon.hpp"
 #include "muon_replica.hpp"
 #include "ising_recon.hpp"
+#include "run_talk.hpp"
 
 #include <algorithm>
 #include <chrono>
@@ -102,6 +103,7 @@ static double seconds_since(std::chrono::steady_clock::time_point t0) {
 static int g_candidates = 1 << 27;
 
 int main(int argc, char** argv) {
+    RunTalk talk = RunTalk::begin("check_ising");
     // optional: exposure as log2(candidates per chamber), for the exposure sweep
     if (argc > 1) g_candidates = 1 << std::atoi(argv[1]);
     std::printf("\nQuBLAR -- binary branches (ADR-007)\n\n");
@@ -153,8 +155,11 @@ int main(int argc, char** argv) {
         map.anneal_sweeps = 400;
         map.hold_sweeps = 20;
         double annealed = 1e300;
-        for (int seed = 1; seed <= 8; ++seed)
-            annealed = std::min(annealed, binary_energy(p, anneal_branch(p, map, seed)));
+        {
+            Tick cpu(talk, false);
+            for (int seed = 1; seed <= 8; ++seed)
+                annealed = std::min(annealed, binary_energy(p, anneal_branch(p, map, seed)));
+        }
         check(std::fabs(annealed - exact) < 1e-9, "annealer reaches the exact ground state",
               num("annealed", annealed) + ", " + num("exact (2^16)", exact));
     }
@@ -195,9 +200,12 @@ int main(int argc, char** argv) {
 
     std::vector<MuonBinnedData> seen, seen0;
     auto te = std::chrono::steady_clock::now();
-    for (int c = 0; c < 3; ++c) {
-        seen.push_back(expose(m_void, kChambers[c], 1u + c, imaging_sky(), g_candidates));
-        seen0.push_back(expose(m_empty, kChambers[c], 1u + c, imaging_sky(), g_candidates));
+    {
+        Tick gpu(talk, true);
+        for (int c = 0; c < 3; ++c) {
+            seen.push_back(expose(m_void, kChambers[c], 1u + c, imaging_sky(), g_candidates));
+            seen0.push_back(expose(m_empty, kChambers[c], 1u + c, imaging_sky(), g_candidates));
+        }
     }
     std::printf("\n  exposure: %d candidates per chamber (2^%d), 6 exposures in %.1f s\n",
                 g_candidates, int(std::log2(double(g_candidates)) + 0.5), seconds_since(te));
@@ -217,8 +225,11 @@ int main(int argc, char** argv) {
                 prob.n_vars(), prob.n_rays(), prob.a.size(), seconds_since(t0));
     t0 = std::chrono::steady_clock::now();
     std::vector<std::vector<uint8_t>> branches;
-    const std::vector<float> pv = branch_fractions(prob, posterior, kBranches, n_threads,
-                                                   &branches);
+    std::vector<float> pv;
+    {
+        Tick cpu(talk, false);
+        pv = branch_fractions(prob, posterior, kBranches, n_threads, &branches);
+    }
     std::printf("    %d branches annealed in %.1f s on %u threads\n", kBranches,
                 seconds_since(t0), n_threads);
 
@@ -279,7 +290,11 @@ int main(int argc, char** argv) {
     // ---- C. hallucination ------------------------------------------------------
     std::printf("\n  C. the empty pyramid, same seeds, same priors\n");
     const BinaryProblem prob0 = build_binary_problem(m_model, views0, domain, kLambda, kappa);
-    const std::vector<float> pv0 = branch_fractions(prob0, posterior, kBranches, n_threads);
+    std::vector<float> pv0;
+    {
+        Tick cpu(talk, false);
+        pv0 = branch_fractions(prob0, posterior, kBranches, n_threads);
+    }
     int false_not = 0, und0 = 0;
     for (int i = 0; i < prob0.n_vars(); ++i) {
         const Bit bit = classify(pv0[i]);
@@ -314,7 +329,11 @@ int main(int argc, char** argv) {
     std::printf("\n  D. the void run with the prior off (lambda = kappa = 0)\n");
     std::printf("    evidence budget for the true void: data %+.1f nats, prior %+.1f nats "
                 "-> the prior %s\n", gain, cost, data_pay ? "is outweighed" : "wins");
-    const std::vector<float> pv_d = branch_fractions(prob_d, posterior, kBranches, n_threads);
+    std::vector<float> pv_d;
+    {
+        Tick cpu(talk, false);
+        pv_d = branch_fractions(prob_d, posterior, kBranches, n_threads);
+    }
     int data_driven = 0, prior_hides = 0;
     double pv_truth = 0.0, pvd_truth = 0.0;
     for (int i = 0; i < prob.n_vars(); ++i) {
@@ -366,7 +385,11 @@ int main(int argc, char** argv) {
             s.anneal_sweeps = cf.anneal;
             s.hold_sweeps = cf.hold;
             const auto tc = std::chrono::steady_clock::now();
-            const std::vector<float> q = branch_fractions(prob, s, cf.branches, n_threads);
+            std::vector<float> q;
+            {
+                Tick cpu(talk, false);
+                q = branch_fractions(prob, s, cf.branches, n_threads);
+            }
             const double secs = seconds_since(tc);
             std::vector<int> got;
             int correct = 0;
@@ -391,8 +414,11 @@ int main(int argc, char** argv) {
         for (int i = 0; i < prob.n_vars(); ++i)
             if (classify(pv[i]) == Bit::NotThere) ref.push_back(i);
         // the yardstick: the reference itself with other seeds
-        const std::vector<float> pv_other = branch_fractions(prob, posterior, kBranches,
-                                                             n_threads, nullptr, 1000);
+        std::vector<float> pv_other;
+        {
+            Tick cpu(talk, false);
+            pv_other = branch_fractions(prob, posterior, kBranches, n_threads, nullptr, 1000);
+        }
         std::vector<int> other;
         for (int i = 0; i < prob.n_vars(); ++i)
             if (classify(pv_other[i]) == Bit::NotThere) other.push_back(i);
@@ -406,7 +432,11 @@ int main(int argc, char** argv) {
         const FreezeResult fr = freeze_provable_rock(prob, kMargin);
         const double t_freeze = seconds_since(tf);
         tf = std::chrono::steady_clock::now();
-        const std::vector<float> pv_r = branch_fractions(fr.reduced, posterior, kBranches, n_threads);
+        std::vector<float> pv_r;
+        {
+            Tick cpu(talk, false);
+            pv_r = branch_fractions(fr.reduced, posterior, kBranches, n_threads);
+        }
         const double t_anneal = seconds_since(tf);
         std::vector<int> got;
         int correct = 0;
@@ -530,6 +560,8 @@ int main(int argc, char** argv) {
 
     cudaFree(d_mu);
     cudaFree(d_mu_empty);
+    const char* verdict = failures == 0 ? "PASS" : "FAIL";
     std::printf("\n%s\n\n", failures == 0 ? "all checks passed" : "FAILURES PRESENT");
+    talk.end(verdict);
     return failures == 0 ? 0 : 1;
 }

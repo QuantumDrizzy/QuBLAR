@@ -8,6 +8,7 @@
 // =============================================================================
 
 #include "ising_recon.hpp"
+#include "run_talk.hpp"
 
 #include <algorithm>
 #include <cmath>
@@ -72,6 +73,7 @@ static BinaryProblem tiny_synthetic() {
 }
 
 int main() {
+    RunTalk talk = RunTalk::begin("check_local_field");
     std::printf("\nQuBLAR -- local-field ΔE vs binary_energy\n\n");
     const BinaryProblem p = tiny_synthetic();
     const int n = p.n_vars();
@@ -94,6 +96,8 @@ int main() {
     bool saw_uphill = false;
     int compared = 0;
 
+    {
+    Tick cpu(talk, false);
     for (const auto& x0 : configs) {
         const double e_before = binary_energy(p, x0);
         scale = std::max(scale, std::fabs(e_before));
@@ -109,6 +113,7 @@ int main() {
             ++compared;
         }
     }
+    }
 
     const double tol = 1e-6 * std::max(1.0, scale);
     check(compared > 0, "compared proposed flips", num("n", compared));
@@ -120,5 +125,6 @@ int main() {
 
     std::printf("\n  worst abs err = %.6g  (tol = %.6g)\n", worst, tol);
     std::printf("  %s\n\n", failures ? "FAILED" : "all checks passed");
+    talk.end(failures ? "FAIL" : "PASS");
     return failures ? 1 : 0;
 }

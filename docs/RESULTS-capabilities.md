@@ -84,6 +84,21 @@ bar `1e-6 · max(1, |E|)`; measured scale ≈ 7.50). Exit 0.
 The accept/reject stays in C++ because it branches on the data and on a random
 draw; LYTH does not compile that.
 
+## What a run says
+
+`check_ising`, `check_mine`, `check_ahead`, and `check_local_field` turn stdout
+unbuffered and print before any GPU work:
+
+```
+QuBLAR <name> start
+QuBLAR <name> done wall_s=… gpu_s=… cpu_s=… dram_GBs=not_counted verdict=PASS|FAIL
+```
+
+`gpu_s` is the muon expose (device, synchronized). `cpu_s` is the host anneal,
+including `local_field_dE`. `dram_GBs` is not counted: these checks have no
+device-byte counter, so the line does not invent one. If `start` is not on
+screen within a few seconds, the process is not this build.
+
 ## Build
 
 ```bat
