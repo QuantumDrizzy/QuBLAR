@@ -178,6 +178,16 @@ document written after:
 | [ADR-012](docs/adr/ADR-012-tunnel-nlos-ghost.md) | pre-registered NLOS around a mine-drift corner and ghost imaging through dust: 1/7 PASS |
 | [ADR-013](docs/adr/ADR-013-ree-separation-qubo.md) | pre-registered rare-earth solvent-extraction sequencing as a QUBO: 0/3 pass/fail rules PASS (R3 tie, R4 comparable) |
 | [ADR-014](docs/adr/ADR-014-ree-carbonatite-muography.md) | pre-registered muography of a REE carbonatite from an underground drift: 3/6 PASS |
+| [ADR-015](docs/adr/ADR-015-p1-bench-harness.md) | P1, pre-registered bench harness and per-edge-weight integer Ising format (Gset ±1, G81, K2000, TTS99): 6/7 PASS (R6 FAIL: G22 one cut short) |
+| [ADR-016](docs/adr/ADR-016-p2-gpu-anneal.md) | P2, pre-registered GPU annealing engine: **INTERRUPTED, no verdict** (G1/G22 measured, 28.8x/18.7x, bit-identical to CPU; G81/K2000 not run) -- [partial results](experiments/p2_gpu/RESULTS_PARTIAL.md) |
+
+## Records: limits, history, benchmarks
+
+- [docs/KNOWN_LIMITS.md](docs/KNOWN_LIMITS.md) -- the living list of known limits (KL-001...), each with its
+  evidence, impact, workaround and status. Start here before trusting a number at a new scale.
+- [docs/HISTORY.md](docs/HISTORY.md) -- dated log of the work, with every verdict and a link to each RESULTS file.
+- [docs/benchmarks/](docs/benchmarks/README.md) -- CPU vs GPU throughput, P1 gap and TTS99, P2 TTS99, and a VRAM
+  planning model (calculated, not measured), rendered from the committed CSVs by `tools/render_benchmarks.py`.
 
 ## On trusting the numbers
 

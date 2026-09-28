@@ -1,0 +1,8 @@
+# CALCULATED ESTIMATE, NOT MEASURED. Model and formulas: docs/benchmarks/README.md. Only the 16 GB card's 1.11e10/s is measured.
+vram_gb,card,short,cards,total_sm,total_w,usable_bytes,dense_int8_n_max,sparse_edges_mem_limit,sparse_edges_max,edges_capped_by_int32,speed_ceiling_per_s,speed_per_watt,multi_gpu_code_needed,status
+16,RTX 5060 Ti 16GB,5060 Ti,1,36,180,1.546e+10,124345,1.546e+09,1.074e+09,yes,1.11e+10,6.17e+07,no,"CALCULATED ESTIMATE, NOT MEASURED"
+32,RTX 5090,5090,1,170,575,3.092e+10,175851,3.092e+09,1.074e+09,yes,5.24e+10,9.12e+07,no,"CALCULATED ESTIMATE, NOT MEASURED"
+48,RTX PRO 5000 Blackwell 48GB,PRO 5000 48G,1,110,300,4.639e+10,215373,4.639e+09,1.074e+09,yes,3.39e+10,1.13e+08,no,"CALCULATED ESTIMATE, NOT MEASURED"
+64,2x RTX 5090 (no single 64 GB card known),2x 5090,2,340,1150,6.185e+10,248691,6.185e+09,1.074e+09,yes,1.05e+11,9.12e+07,yes,"CALCULATED ESTIMATE, NOT MEASURED"
+72,RTX PRO 5000 Blackwell 72GB,PRO 5000 72G,1,110,300,6.958e+10,263777,6.958e+09,1.074e+09,yes,3.39e+10,1.13e+08,no,"CALCULATED ESTIMATE, NOT MEASURED"
+96,RTX PRO 6000 Blackwell Workstation,PRO 6000,1,188,600,9.277e+10,304583,9.277e+09,1.074e+09,yes,5.8e+10,9.66e+07,no,"CALCULATED ESTIMATE, NOT MEASURED"

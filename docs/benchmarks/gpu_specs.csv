@@ -1,0 +1,8 @@
+# Public specs, verify before purchase. Retrieved 2026-09-28. Only the RTX 5060 Ti rate is measured (ADR-016, G1); nothing else here was run.
+vram_gb,card,short,cards,sm_per_card,tgp_w_per_card,measured_rate_per_s,multi_gpu_code_needed,source_url
+16,RTX 5060 Ti 16GB,5060 Ti,1,36,180,1.11e10,no,https://www.nvidia.com/en-me/geforce/graphics-cards/50-series/rtx-5060-family/
+32,RTX 5090,5090,1,170,575,,no,https://images.nvidia.com/aem-dam/Solutions/geforce/blackwell/nvidia-rtx-blackwell-gpu-architecture.pdf
+48,RTX PRO 5000 Blackwell 48GB,PRO 5000 48G,1,110,300,,no,https://www.nvidia.com/content/dam/en-zz/Solutions/design-visualization/quadro-product-literature/pdf/NVIDIA-RTX-Blackwell-PRO-GPU-Architecture-v1_1.pdf
+64,2x RTX 5090 (no single 64 GB card known),2x 5090,2,170,575,,yes,https://images.nvidia.com/aem-dam/Solutions/geforce/blackwell/nvidia-rtx-blackwell-gpu-architecture.pdf
+72,RTX PRO 5000 Blackwell 72GB,PRO 5000 72G,1,110,300,,no,https://www.pny.com/en-eu/nvidia-rtx-pro-5000-72gb-blackwell
+96,RTX PRO 6000 Blackwell Workstation,PRO 6000,1,188,600,,no,https://www.nvidia.com/content/dam/en-zz/Solutions/design-visualization/quadro-product-literature/pdf/NVIDIA-RTX-Blackwell-PRO-GPU-Architecture-v1_1.pdf
