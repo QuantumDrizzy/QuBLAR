@@ -77,6 +77,7 @@ static double gauss(uint64_t& s) {
 struct Outcome {
     double gain = 0, cost = 0;
     int confident = 0, hits = 0, undecided = 0, truth_n = 0, control_false = 0;
+    int u2_miss = 0;                               // ADR-019 U2: body bits called rock
     double horiz = -1, depth = 0;
     double e_truth = 0, e_best = 0, e_mean = 0;   // sampler or model: which one misses?
     bool ok = false;
@@ -155,6 +156,7 @@ static Outcome run(double sigma, unsigned threads, RunTalk& talk, bool draw) {
         o.truth_n += truth[b];
         if (p0[b] >= 0.9f) ++o.control_false;
         if (p[b] > 0.1f && p[b] < 0.9f) ++o.undecided;
+        o.u2_miss += truth[b] && p[b] <= 0.1f;
         if (p[b] < 0.9f) continue;
         ++o.confident;
         o.hits += truth[b];
@@ -200,6 +202,12 @@ int main() {
                     o.undecided, o.horiz, o.depth, o.control_false,
                     o.ok ? "PASS" : (xfail ? "XFAIL (depth bias, model)" : "FAIL"));
         fails += !o.ok && !xfail;
+        // ADR-019 U1 is a hard FAIL of its own, never absorbed by the XFAIL above.
+        const bool u1 = o.confident == o.hits;
+        fails += !u1;
+        std::printf("           U1 (ADR-019): %d confident off the truth -> %s; "
+                    "U2 (reported): %d body bits called rock\n",
+                    o.confident - o.hits, u1 ? "PASS" : "FAIL", o.u2_miss);
         std::printf("           energy: truth %.1f, best branch %.1f, mean branch %.1f  (%s)\n",
                     o.e_truth, o.e_best, o.e_mean,
                     o.e_best < o.e_truth ? "the model prefers the branches: a MODEL bias"

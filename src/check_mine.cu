@@ -141,6 +141,7 @@ struct BodyResult {
     double gain = 0, cost = 0;
     bool data_pay = false;
     int n_ore_label = 0, hit = 0, truth_n = 0, false_ore = 0;
+    int u2_miss = 0;  // ADR-019 U2: true-ore bits called rock with confidence
     double dist = -1.0;
     bool ok = false;
 };
@@ -198,6 +199,7 @@ static BodyResult run_body(float ore_half, int candidates, unsigned n_threads, R
     for (int i = 0; i < prob.n_vars(); ++i) {
         const int v = prob.var_voxel[i];
         R.truth_n += truth[v];
+        R.u2_miss += truth[v] && classify(pv[i]) == Bit::Exists;
         if (classify(pv[i]) != Bit::NotThere) continue;
         ++R.n_ore_label;
         R.hit += truth[v];
@@ -293,6 +295,11 @@ int main(int argc, char** argv) {
                 check(R.ok, "correct decline; no confident true-ore; control clean",
                       std::string(tag) + ", " + num("hit", R.hit) + ", "
                           + num("false", R.false_ore));
+            // ADR-019: U1 is exit-changing, U2 is reported only.
+            check(R.n_ore_label == R.hit, "U1 (ADR-019): no confident ore off the truth",
+                  std::string(tag) + ", " + num("off truth", R.n_ore_label - R.hit));
+            std::printf("    U2 (ADR-019, reported): %d true-ore bits called rock with confidence\n",
+                        R.u2_miss);
         }
         std::printf("\n");
     }

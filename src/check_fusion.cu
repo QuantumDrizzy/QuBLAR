@@ -125,6 +125,7 @@ static double gauss(uint64_t& s) {
 
 struct Stats {
     int confident = 0, hits = 0, claimed = 0, undecided = 0;
+    int u2_miss = 0;   // ADR-019 U2: ore bits called rock with confidence
     double horiz = -1, depth_claimed = -1, horiz_claimed = -1;
 };
 
@@ -136,6 +137,7 @@ static Stats stats(const BitField& bits, const CellGrid& g, const std::vector<ch
         double c[3];
         g.centre(bits.site[b], c);
         if (p[b] > 0.1f && p[b] < 0.9f) ++s.undecided;
+        s.u2_miss += truth[b] && p[b] <= 0.1f;
         if (p[b] >= 0.5f) { ++s.claimed; ax += c[0]; ay += c[1]; az += c[2]; }
         if (p[b] >= 0.9f) { ++s.confident; s.hits += truth[b]; cx += c[0]; cy += c[1]; }
     }
@@ -279,6 +281,17 @@ int main() {
     std::printf("  R3 fused depth error < gravity's (the question)          %s\n", r3);
     std::printf("  R4 fused pays -> confident bits within 4 m horizontally  %s\n", r4 ? "PASS" : "FAIL");
     fails += !r1 + !r2 + !r4;
+
+    // ADR-019: U1 (exit-changing) per sensor, U2 reported only.
+    const struct { const char* name; const Stats* s; } u[3] = {
+        {"muons", &s_mu}, {"gravity", &s_gr}, {"fused", &s_fu}};
+    for (const auto& r : u) {
+        const bool u1 = r.s->confident == r.s->hits;
+        fails += !u1;
+        std::printf("  U1 (ADR-019) %-8s %3d confident off the truth          %s   "
+                    "U2 (reported): %d ore bits called rock\n",
+                    r.name, r.s->confident - r.s->hits, u1 ? "PASS" : "FAIL", r.s->u2_miss);
+    }
 
     // ---- the bits: a section through the ore, y = +1 m -------------------------------
     std::printf("\n  section y = +1 m (x from -36 to +36 m); '1' p>=0.9, '0' p<=0.1, '?' between\n");

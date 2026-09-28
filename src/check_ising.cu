@@ -286,6 +286,17 @@ int main(int argc, char** argv) {
         check(hit == 0, "no true-void voxel is labelled does-not-exist",
               num("correct", hit));
     }
+    // ADR-019 U1: no confident void off the truth, in the body run as in the control.
+    // U2: true-void bits called rock with confidence, reported, never exit-changing.
+    {
+        int u2_miss = 0;
+        for (int i = 0; i < prob.n_vars(); ++i)
+            u2_miss += truth[prob.var_voxel[i]] && classify(pv[i]) == Bit::Exists;
+        check(n_not == hit, "U1 (ADR-019): no confident void off the truth",
+              num("off truth", n_not - hit));
+        std::printf("    U2 (ADR-019, reported): %d true-void bits called rock with confidence\n",
+                    u2_miss);
+    }
 
     // ---- C. hallucination ------------------------------------------------------
     std::printf("\n  C. the empty pyramid, same seeds, same priors\n");

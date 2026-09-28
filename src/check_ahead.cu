@@ -240,6 +240,12 @@ int main(int argc, char** argv) {
         std::printf("    localisation not claimed (data do not pay); "
                     "Undecided would still block under the policy map\n");
     }
+    // ADR-019 U1: every confident void must be on the truth. U2 (reported): truth
+    // cavity bits called rock with confidence, i.e. the clear-on-truth count.
+    check(n_not_all == hit, "U1 (ADR-019): no confident void off the truth",
+          num("off truth", n_not_all - hit));
+    std::printf("    U2 (ADR-019, reported): %d cavity bits called rock with confidence\n",
+                n_clear_on_truth);
 
     // ---- empty control -------------------------------------------------------
     std::printf("\n  B. control, no cavity\n");
