@@ -1,0 +1,5 @@
+sha256=d55ce27b0cf98ddbf12cb8b236e0de07bb57e32835409c3ddb7b61370f106b04
+file=experiments/u1/ADR-019.prereg-frozen.md
+frozen_at=2026-09-28T19:05:49.2907366+02:00
+git_head=2e6732fe777f067c6b85a061d92e4b6494e90532
+note=frozen before any check was edited or re-run under U1
