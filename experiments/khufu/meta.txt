@@ -1,0 +1,21 @@
+log2M 23
+seeds 8
+nb 25200
+n_th 70
+n_az 360
+th_max 1.221730
+ndet 13
+scanBV lo -12.80 -30.00 40.00 step 1 1 1 n 41 81 41
+scanNFC lo 2.20 80.00 16.00 step 0.25 0.5 0.25 n 41 49 49
+vol1m 240 240 142 lo -120 -120 -2 vox 1
+jv_1gev 70.156312
+jv_p0 87.594031
+verdict_a_K1 1
+verdict_a_K2 1
+verdict_a_K1i 1
+verdict_b 1
+nok_K1 8
+nok_K2 8
+verdict_c 1
+blind_err 0.630
+verdict_d 18/25

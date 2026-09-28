@@ -1,0 +1,5 @@
+truth 13.000 -14.702 66.483
+rejection_tries 1
+error_m 0.630
+within_5m 1
+wall_time_s 108.411

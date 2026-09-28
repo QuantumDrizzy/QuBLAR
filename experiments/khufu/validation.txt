@@ -1,0 +1,1 @@
+K0 seed1 NE1 2^24 Bernoulli seed 777: expected 154854.5 detected 154996 chi2 11779.39 ndf 11678 chi2/ndf 1.0087 PASS

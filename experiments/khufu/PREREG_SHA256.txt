@@ -1,0 +1,5 @@
+sha256=8bbeebe9d8b7488715ed0b4fcc45138d8f1bb84660d959bdd2158291c77f5afd
+file=experiments/khufu/ADR-011.prereg-frozen.md
+frozen_at=2026-09-28T04:12:28.9139325+02:00
+git_head=2747e946a9e2391a0659d630fe73df22cae31404
+note=frozen before any check_khufu code was written or run
