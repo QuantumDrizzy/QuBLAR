@@ -1,0 +1,5 @@
+sha256: 6d0f2b58a31c53750e1cdad6b1084b09ae632870432645f142529343cc1a6ab2
+file: experiments/ree_muography/ADR-014.prereg-frozen.md
+frozen_at: 2026-09-28T05:08:31.0420092+02:00
+git_head: 2747e946a9e2391a0659d630fe73df22cae31404
+note: frozen before any ADR-014 code was written or run; section 9 is filled only in docs/adr/ADR-014-ree-carbonatite-muography.md

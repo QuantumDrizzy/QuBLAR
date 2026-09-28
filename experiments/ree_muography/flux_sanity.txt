@@ -1,0 +1,11 @@
+open_vertical_intensity_cm2_s_sr 8.289395e-03
+T_vertical_540mwe 9.120328e-04
+sim_vertical_540_cm2_s_sr 7.560200e-06
+sim_vertical_529p2_scene_cm2_s_sr 7.929809e-06
+MeiHime_eq1_vertical_0p54 2.826803e-06
+ratio_sim_over_MH1 2.6745
+sim_total_flux_flat_540_70deg_cm2_s 1.390731e-05
+MeiHime_eq4_total_0p54 1.117524e-05
+ratio_total_sim_over_MH4 1.2445
+K0_mean_counts_per_day_in_acceptance D1 9613.13 D2 9613.13 D3 9613.13 D4 9613.13
+K0_mean_empirical_vertical_intensity_theta_lt_5deg_D2_cm2_s_sr 7.885750e-06

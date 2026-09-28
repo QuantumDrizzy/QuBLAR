@@ -1,0 +1,136 @@
+start 2026-09-28T05:14:12.5174736+02:00
+
+QuBLAR -- check_ree_muo (ADR-014 pre-registered; SYNTHETIC)
+
+  grid 480x420x204 @ 1.0 m; 4 detectors; 2^23 rays per detector per scene; seeds 1..8; 48 cells
+  flux (Reyna 2006): vertical J(>1 GeV) = 70.2 m^-2 s^-1 sr^-1; J(>0.2 GeV/c) = 87.6
+  vertical survival T(X): 300 mwe 3.414e-03 | 529.2 9.566e-04 | 540 9.120e-04 | 800 3.465e-04 | 1200 1.161e-04
+  flux sanity: sim vertical at 540 mwe 7.560e-06 vs Mei-Hime eq.(1) 2.827e-06 (ratio 2.67); total 1.391e-05 vs eq.(4) 1.118e-05 (ratio 1.24)
+  D1 ( -30.0,   0.0,  -200.0) 1.0 m2, box |tan| <= 1, 17328 bins in acceptance
+  D2 ( -10.0,   0.0,  -200.0) 1.0 m2, box |tan| <= 1, 17328 bins in acceptance
+  D3 (  10.0,   0.0,  -200.0) 1.0 m2, box |tan| <= 1, 17328 bins in acceptance
+  D4 (  30.0,   0.0,  -200.0) 1.0 m2, box |tan| <= 1, 17328 bins in acceptance
+  models: 49 scenes x 4 detectors x 9 scales in 34.1 s
+  K0 counts/day in acceptance: D1 9613.1 D2 9613.1 D3 9613.1 D4 9613.1; empirical vertical (theta<5 deg, D2) 7.886e-06
+  seed 1: sd(smooth) 0.0081 sd(total) 0.0311; 49 scenes done (30.5 s)
+  seed 2: sd(smooth) 0.0080 sd(total) 0.0311; 49 scenes done (61.2 s)
+  seed 3: sd(smooth) 0.0080 sd(total) 0.0310; 49 scenes done (92.1 s)
+  seed 4: sd(smooth) 0.0080 sd(total) 0.0311; 49 scenes done (123.1 s)
+  seed 5: sd(smooth) 0.0080 sd(total) 0.0310; 49 scenes done (154.1 s)
+  seed 6: sd(smooth) 0.0081 sd(total) 0.0311; 49 scenes done (185.0 s)
+  seed 7: sd(smooth) 0.0080 sd(total) 0.0311; 49 scenes done (215.8 s)
+  seed 8: sd(smooth) 0.0079 sd(total) 0.0310; 49 scenes done (247.0 s)
+  realisations: 49 scenes x 8 seeds in 247.0 s
+  validation (K0 seed 1, D2, 2^24 Bernoulli, seed 777; pooled cells e>=5): expected 11197.8, detected 11269, chi2/ndf = 1.021 (ndf 2107) PASS
+  exploratory validation, 2^28 rays: expected 179150.9, detected 179271, chi2/ndf = 1.002 (ndf 15584)
+  bins in the statistic: 69312
+  statistic: 48 cells x 5 exposures x 8 seeds in 19.4 s
+
+  cell     d    L  drho | Z_emp (AUC) at T = 30 / 45 / 90 / 180 / 365 d | Z_ideal(180)
+     0    40    5  0.05 |   -0.73 (0.34)   -1.62 (0.30)    0.56 (0.66)   -0.18 (0.41)    0.42 (0.67) | 0.1
+     1    40    5  0.25 |   -0.63 (0.38)    0.29 (0.53)   -0.12 (0.58)   -0.18 (0.48)    1.09 (0.78) | 0.3
+     2    40    5  0.60 |   -0.35 (0.31)   -0.33 (0.44)    1.75 (0.80)    0.14 (0.47)    0.85 (0.81) | 0.7
+     3    40   10  0.05 |   -0.23 (0.42)   -0.69 (0.31)    0.50 (0.61)    0.18 (0.55)    0.39 (0.66) | 0.3
+     4    40   10  0.25 |    0.57 (0.55)    0.83 (0.72)    0.44 (0.62)    1.11 (0.69)    0.76 (0.73) | 1.4
+     5    40   10  0.60 |    1.10 (0.78)    1.48 (0.81)    1.70 (0.89)    2.02 (0.88)    2.31 (0.97) | 3.2
+     6    40   20  0.05 |    0.11 (0.66)    0.48 (0.56)    0.44 (0.75)    0.70 (0.69)    0.66 (0.70) | 1.1
+     7    40   20  0.25 |    1.28 (0.81)    2.19 (0.94)    2.81 (0.94)    2.81 (1.00)    3.03 (1.00) | 5.6
+     8    40   20  0.60 |    3.63 (0.98)    6.03 (1.00)    6.37 (1.00)    6.39 (1.00)    7.06 (1.00) | 13.1  DETECTED
+     9    40   40  0.05 |    0.59 (0.61)    1.27 (0.83)    1.06 (0.80)    2.34 (0.89)    1.75 (0.91) | 4.5
+    10    40   40  0.25 |    5.30 (1.00)    6.16 (1.00)    7.72 (1.00)   12.09 (1.00)    9.04 (1.00) | 22.0  DETECTED
+    11    40   40  0.60 |   12.36 (1.00)   13.70 (1.00)   17.85 (1.00)   26.98 (1.00)   20.86 (1.00) | 51.3  DETECTED
+    12    80    5  0.05 |   -0.35 (0.50)    0.47 (0.72)   -0.56 (0.33)    0.06 (0.55)   -0.25 (0.41) | 0.1
+    13    80    5  0.25 |   -0.33 (0.47)    0.08 (0.55)   -0.28 (0.47)    0.42 (0.58)    0.26 (0.45) | 0.4
+    14    80    5  0.60 |    0.60 (0.66)    0.63 (0.62)    0.83 (0.61)    0.46 (0.61)    0.45 (0.64) | 1.0
+    15    80   10  0.05 |    0.53 (0.62)    0.92 (0.70)   -0.70 (0.27)   -0.21 (0.36)    0.67 (0.72) | 0.4
+    16    80   10  0.25 |    1.61 (0.75)    1.14 (0.81)    0.85 (0.78)    0.26 (0.64)    1.58 (0.84) | 1.8
+    17    80   10  0.60 |    1.19 (0.81)    2.28 (0.94)    2.12 (0.95)    2.01 (1.00)    5.19 (1.00) | 4.2
+    18    80   20  0.05 |    0.39 (0.59)    0.80 (0.88)    0.76 (0.69)    0.55 (0.62)    1.26 (0.78) | 1.4
+    19    80   20  0.25 |    2.13 (0.97)    2.83 (0.97)    2.33 (1.00)    3.69 (1.00)    3.75 (1.00) | 7.1
+    20    80   20  0.60 |    4.66 (1.00)    6.25 (1.00)    6.06 (1.00)    8.46 (1.00)    7.75 (1.00) | 16.8  DETECTED
+    21    80   40  0.05 |    0.92 (0.78)    1.56 (0.91)    2.09 (0.91)    2.61 (0.95)    1.82 (0.89) | 5.7
+    22    80   40  0.25 |    7.15 (1.00)    9.82 (1.00)    9.05 (1.00)   12.58 (1.00)    9.60 (1.00) | 28.1  DETECTED
+    23    80   40  0.60 |   17.08 (1.00)   22.26 (1.00)   20.69 (1.00)   29.91 (1.00)   22.03 (1.00) | 65.4  DETECTED
+    24   120    5  0.05 |   -0.86 (0.23)    0.70 (0.75)   -0.29 (0.45)   -0.01 (0.50)    0.23 (0.64) | 0.1
+    25   120    5  0.25 |    0.88 (0.75)    0.77 (0.77)    0.40 (0.58)    1.49 (0.83)    0.44 (0.72) | 0.6
+    26   120    5  0.60 |   -0.06 (0.47)    1.07 (0.84)    0.20 (0.56)    1.77 (0.77)    1.09 (0.86) | 1.3
+    27   120   10  0.05 |   -0.51 (0.41)    0.63 (0.64)    0.44 (0.66)    1.76 (0.83)    0.59 (0.70) | 0.5
+    28   120   10  0.25 |    0.58 (0.62)    1.61 (0.89)    1.13 (0.81)    3.65 (0.98)    1.99 (0.89) | 2.4
+    29   120   10  0.60 |    1.79 (0.92)    2.16 (0.97)    2.40 (0.98)    7.70 (1.00)    4.36 (1.00) | 5.7  DETECTED
+    30   120   20  0.05 |    0.39 (0.50)    0.72 (0.80)    0.43 (0.72)    0.54 (0.67)    0.85 (0.78) | 1.9
+    31   120   20  0.25 |    2.38 (0.98)    3.78 (1.00)    2.90 (0.98)    4.70 (1.00)    3.93 (0.98) | 9.6
+    32   120   20  0.60 |    5.87 (1.00)    8.32 (1.00)    6.61 (1.00)   11.32 (1.00)    9.52 (1.00) | 22.8  DETECTED
+    33   120   40  0.05 |    1.27 (0.80)    2.18 (0.95)    1.91 (0.94)    2.76 (0.98)    2.48 (0.92) | 7.7
+    34   120   40  0.25 |    7.65 (1.00)   11.89 (1.00)   10.44 (1.00)   13.49 (1.00)   11.35 (1.00) | 37.8  DETECTED
+    35   120   40  0.60 |   18.31 (1.00)   26.98 (1.00)   24.87 (1.00)   30.95 (1.00)   25.67 (1.00) | 88.2  DETECTED
+    36   160    5  0.05 |   -0.07 (0.42)    0.14 (0.55)    0.76 (0.70)    0.03 (0.64)    0.52 (0.62) | 0.1
+    37   160    5  0.25 |    0.78 (0.70)    0.22 (0.61)    0.80 (0.75)    1.47 (0.73)    2.07 (0.88) | 0.7
+    38   160    5  0.60 |    0.50 (0.61)    0.65 (0.75)    1.11 (0.72)    2.36 (0.92)    2.20 (0.83) | 1.8
+    39   160   10  0.05 |    0.16 (0.41)   -0.57 (0.45)    0.29 (0.53)    0.91 (0.75)    0.92 (0.70) | 0.6
+    40   160   10  0.25 |    0.47 (0.59)    2.03 (0.91)    1.38 (0.81)    2.98 (0.95)    2.30 (0.89) | 3.2
+    41   160   10  0.60 |    1.78 (1.00)    2.34 (0.95)    3.23 (1.00)    5.48 (1.00)    4.77 (1.00) | 7.6  DETECTED
+    42   160   20  0.05 |    0.32 (0.59)    0.63 (0.67)    1.10 (0.72)    1.18 (0.77)    1.17 (0.78) | 2.6
+    43   160   20  0.25 |    3.01 (1.00)    2.55 (1.00)    4.13 (1.00)    5.12 (1.00)    4.63 (1.00) | 12.9  DETECTED
+    44   160   20  0.60 |    7.09 (1.00)    6.78 (1.00)    9.60 (1.00)   11.27 (1.00)   10.88 (1.00) | 30.5  DETECTED
+    45   160   40  0.05 |    2.16 (0.92)    2.28 (0.97)    3.49 (0.98)    3.43 (1.00)    3.27 (0.98) | 10.5
+    46   160   40  0.25 |   11.38 (1.00)    9.79 (1.00)   16.28 (1.00)   15.98 (1.00)   14.79 (1.00) | 51.7  DETECTED
+    47   160   40  0.60 |   25.80 (1.00)   22.73 (1.00)   36.94 (1.00)   36.78 (1.00)   33.80 (1.00) | 120.6  DETECTED
+  localisation cell  0 (d  40, L  5, +0.05): 0/8 within 5.0 m
+  localisation cell  1 (d  40, L  5, +0.25): 0/8 within 5.0 m
+  localisation cell  2 (d  40, L  5, +0.60): 0/8 within 5.0 m
+  localisation cell  3 (d  40, L 10, +0.05): 0/8 within 5.0 m
+  localisation cell  4 (d  40, L 10, +0.25): 0/8 within 5.0 m
+  localisation cell  5 (d  40, L 10, +0.60): 0/8 within 5.0 m
+  localisation cell  6 (d  40, L 20, +0.05): 0/8 within 10.0 m
+  localisation cell  7 (d  40, L 20, +0.25): 0/8 within 10.0 m
+  localisation cell  8 (d  40, L 20, +0.60): 8/8 within 10.0 m [detected at 180 d]
+  localisation cell  9 (d  40, L 40, +0.05): 0/8 within 20.0 m
+  localisation cell 10 (d  40, L 40, +0.25): 8/8 within 20.0 m [detected at 180 d]
+  localisation cell 11 (d  40, L 40, +0.60): 8/8 within 20.0 m [detected at 180 d]
+  localisation cell 12 (d  80, L  5, +0.05): 0/8 within 5.0 m
+  localisation cell 13 (d  80, L  5, +0.25): 0/8 within 5.0 m
+  localisation cell 14 (d  80, L  5, +0.60): 0/8 within 5.0 m
+  localisation cell 15 (d  80, L 10, +0.05): 0/8 within 5.0 m
+  localisation cell 16 (d  80, L 10, +0.25): 0/8 within 5.0 m
+  localisation cell 17 (d  80, L 10, +0.60): 0/8 within 5.0 m
+  localisation cell 18 (d  80, L 20, +0.05): 0/8 within 10.0 m
+  localisation cell 19 (d  80, L 20, +0.25): 2/8 within 10.0 m
+  localisation cell 20 (d  80, L 20, +0.60): 8/8 within 10.0 m [detected at 180 d]
+  localisation cell 21 (d  80, L 40, +0.05): 1/8 within 20.0 m
+  localisation cell 22 (d  80, L 40, +0.25): 8/8 within 20.0 m [detected at 180 d]
+  localisation cell 23 (d  80, L 40, +0.60): 8/8 within 20.0 m [detected at 180 d]
+  localisation cell 24 (d 120, L  5, +0.05): 0/8 within 5.0 m
+  localisation cell 25 (d 120, L  5, +0.25): 0/8 within 5.0 m
+  localisation cell 26 (d 120, L  5, +0.60): 0/8 within 5.0 m
+  localisation cell 27 (d 120, L 10, +0.05): 0/8 within 5.0 m
+  localisation cell 28 (d 120, L 10, +0.25): 0/8 within 5.0 m
+  localisation cell 29 (d 120, L 10, +0.60): 4/8 within 5.0 m [detected at 180 d]
+  localisation cell 30 (d 120, L 20, +0.05): 0/8 within 10.0 m
+  localisation cell 31 (d 120, L 20, +0.25): 5/8 within 10.0 m
+  localisation cell 32 (d 120, L 20, +0.60): 8/8 within 10.0 m [detected at 180 d]
+  localisation cell 33 (d 120, L 40, +0.05): 1/8 within 20.0 m
+  localisation cell 34 (d 120, L 40, +0.25): 8/8 within 20.0 m [detected at 180 d]
+  localisation cell 35 (d 120, L 40, +0.60): 8/8 within 20.0 m [detected at 180 d]
+  localisation cell 36 (d 160, L  5, +0.05): 0/8 within 5.0 m
+  localisation cell 37 (d 160, L  5, +0.25): 0/8 within 5.0 m
+  localisation cell 38 (d 160, L  5, +0.60): 0/8 within 5.0 m
+  localisation cell 39 (d 160, L 10, +0.05): 0/8 within 5.0 m
+  localisation cell 40 (d 160, L 10, +0.25): 1/8 within 5.0 m
+  localisation cell 41 (d 160, L 10, +0.60): 5/8 within 5.0 m [detected at 180 d]
+  localisation cell 42 (d 160, L 20, +0.05): 0/8 within 10.0 m
+  localisation cell 43 (d 160, L 20, +0.25): 7/8 within 10.0 m [detected at 180 d]
+  localisation cell 44 (d 160, L 20, +0.60): 8/8 within 10.0 m [detected at 180 d]
+  localisation cell 45 (d 160, L 40, +0.05): 5/8 within 20.0 m
+  localisation cell 46 (d 160, L 40, +0.25): 8/8 within 20.0 m [detected at 180 d]
+  localisation cell 47 (d 160, L 40, +0.60): 8/8 within 20.0 m [detected at 180 d]
+  localisation scans done in 309.5 s
+
+  BLIND: estimate written to blind_estimate.txt: (32.0, 14.0, -86.0)
+  BLIND: truth revealed after the estimate: (32.03, 13.88, -86.93); error 0.93 m -> FOUND (2.6 s)
+
+  MLEM density recon (cell 32, seed 1, T = 180 d, 2 m grid, 20 iters) in 9.9 s
+
+  total wall time 636.5 s
+validation checks passed
+
+end 2026-09-28T05:24:49.3175635+02:00 exit 0

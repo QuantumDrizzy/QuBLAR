@@ -1,0 +1,18 @@
+log2M 23
+seeds 8
+nb 25200
+n_th 70
+n_az 360
+th_max 1.221730
+ndet 4
+NB 69312
+scan_cell lo -60 -40 -190 step 2 n 61 61 91
+scan_blind lo -70 -70 -190 step 2 n 71 71 91
+vol2m 240 210 102 lo -240 -210 -204 vox 2
+example_cell 32
+jv_1gev 70.156312
+jv_p0 87.594031
+exposures 30 45 90 180 365
+blind_err 0.935
+verdict_blind 1
+failures 0

@@ -1,0 +1,7 @@
+truth 32.025 13.885 -86.927
+L 20.0
+drho 0.60
+rejection_tries 1
+error_m 0.935
+within_10m 1
+wall_time_s 626.525

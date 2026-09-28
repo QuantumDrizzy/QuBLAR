@@ -1,0 +1,2 @@
+FROZEN K0 seed1 D2 2^24 Bernoulli seed 777 (accepted bins pooled in bin order to e>=5): expected 11197.83 detected 11269 chi2 2150.878 ndf 2107 chi2/ndf 1.0208 PASS
+EXPLORATORY same with 2^28 rays (16 chunks): expected 179150.88 detected 179271 chi2 15608.465 ndf 15584 chi2/ndf 1.0016
