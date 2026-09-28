@@ -1,0 +1,5 @@
+sha256: b8c2d6575059e4952c320b110d729322c43e9ed200e72f675e04383b869510ed
+file: experiments/ree_cascade/ADR-013.prereg-frozen.md
+frozen_at: 2026-09-28T04:53:25.4115587+02:00
+git_head: 2747e946a9e2391a0659d630fe73df22cae31404
+note: frozen before any ADR-013 code was written or run; section 9 is filled only in docs/adr/ADR-013-ree-separation-qubo.md

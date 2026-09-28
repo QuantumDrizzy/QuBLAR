@@ -1,0 +1,190 @@
+start 2026-09-28T04:55:47.8145053+02:00
+schedule t_hot 5.0 t_cold 1e-03 anneal 400 hold 20 runs 64
+MP_P507-A  n= 5 vars= 20 opt=58.7304 greedy=58.9125 trees=14
+MP_P507-B  n= 5 vars= 20 opt=50.1967 greedy=50.2838 trees=14
+R4_0       n= 4 vars= 10 opt=93.6806 greedy=95.4421 trees=5
+R4_1       n= 4 vars= 10 opt=78.3080 greedy=78.3080 trees=5
+R4_2       n= 4 vars= 10 opt=119.5885 greedy=119.5885 trees=5
+R4_3       n= 4 vars= 10 opt=59.0979 greedy=59.0979 trees=5
+R4_4       n= 4 vars= 10 opt=78.4793 greedy=78.4793 trees=5
+R4_5       n= 4 vars= 10 opt=109.4867 greedy=110.6289 trees=5
+R4_6       n= 4 vars= 10 opt=96.8044 greedy=96.8044 trees=5
+R4_7       n= 4 vars= 10 opt=94.8218 greedy=94.8218 trees=5
+R4_8       n= 4 vars= 10 opt=69.7160 greedy=69.7160 trees=5
+R4_9       n= 4 vars= 10 opt=65.3732 greedy=65.3732 trees=5
+R5_0       n= 5 vars= 20 opt=92.6170 greedy=94.7771 trees=14
+R5_1       n= 5 vars= 20 opt=95.0115 greedy=95.0115 trees=14
+R5_2       n= 5 vars= 20 opt=138.4098 greedy=138.4098 trees=14
+R5_3       n= 5 vars= 20 opt=100.4551 greedy=100.4551 trees=14
+R5_4       n= 5 vars= 20 opt=92.4393 greedy=92.4393 trees=14
+R5_5       n= 5 vars= 20 opt=74.5463 greedy=75.2168 trees=14
+R5_6       n= 5 vars= 20 opt=77.4790 greedy=79.2565 trees=14
+R5_7       n= 5 vars= 20 opt=105.7060 greedy=111.4634 trees=14
+R5_8       n= 5 vars= 20 opt=121.9193 greedy=121.9193 trees=14
+R5_9       n= 5 vars= 20 opt=79.2946 greedy=88.3995 trees=14
+R6_0       n= 6 vars= 35 opt=104.0528 greedy=104.0528 trees=42
+R6_1       n= 6 vars= 35 opt=98.2545 greedy=100.4550 trees=42
+R6_2       n= 6 vars= 35 opt=110.5693 greedy=114.2113 trees=42
+R6_3       n= 6 vars= 35 opt=97.0840 greedy=97.0840 trees=42
+R6_4       n= 6 vars= 35 opt=76.3920 greedy=76.3920 trees=42
+R6_5       n= 6 vars= 35 opt=126.4554 greedy=139.5590 trees=42
+R6_6       n= 6 vars= 35 opt=131.6351 greedy=145.7155 trees=42
+R6_7       n= 6 vars= 35 opt=84.5628 greedy=84.5628 trees=42
+R6_8       n= 6 vars= 35 opt=87.8139 greedy=87.8139 trees=42
+R6_9       n= 6 vars= 35 opt=126.2063 greedy=126.2063 trees=42
+R7_0       n= 7 vars= 56 opt=99.6438 greedy=99.8520 trees=132
+R7_1       n= 7 vars= 56 opt=86.9434 greedy=86.9434 trees=132
+R7_2       n= 7 vars= 56 opt=125.7033 greedy=125.7033 trees=132
+R7_3       n= 7 vars= 56 opt=121.3476 greedy=121.3476 trees=132
+R7_4       n= 7 vars= 56 opt=124.2049 greedy=124.2049 trees=132
+R7_5       n= 7 vars= 56 opt=126.2532 greedy=126.2532 trees=132
+R7_6       n= 7 vars= 56 opt=105.8454 greedy=112.8990 trees=132
+R7_7       n= 7 vars= 56 opt=103.8924 greedy=104.2174 trees=132
+R7_8       n= 7 vars= 56 opt=156.2080 greedy=156.2080 trees=132
+R7_9       n= 7 vars= 56 opt=128.0421 greedy=128.3525 trees=132
+R8_0       n= 8 vars= 84 opt=99.3777 greedy=111.5550 trees=429
+R8_1       n= 8 vars= 84 opt=114.8789 greedy=116.0035 trees=429
+R8_2       n= 8 vars= 84 opt=137.9981 greedy=142.2127 trees=429
+R8_3       n= 8 vars= 84 opt=123.7465 greedy=124.0567 trees=429
+R8_4       n= 8 vars= 84 opt=113.0759 greedy=118.8402 trees=429
+R8_5       n= 8 vars= 84 opt=147.1409 greedy=161.2895 trees=429
+R8_6       n= 8 vars= 84 opt=115.8860 greedy=115.8860 trees=429
+R8_7       n= 8 vars= 84 opt=126.8401 greedy=130.9711 trees=429
+R8_8       n= 8 vars= 84 opt=141.5860 greedy=143.3058 trees=429
+R8_9       n= 8 vars= 84 opt=119.4243 greedy=119.4243 trees=429
+R9_0       n= 9 vars=120 opt=130.7844 greedy=133.4888 trees=1430
+R9_1       n= 9 vars=120 opt=138.2083 greedy=139.7767 trees=1430
+R9_2       n= 9 vars=120 opt=116.4769 greedy=123.0940 trees=1430
+R9_3       n= 9 vars=120 opt=146.7154 greedy=146.7154 trees=1430
+R9_4       n= 9 vars=120 opt=118.3942 greedy=118.3942 trees=1430
+R9_5       n= 9 vars=120 opt=125.0118 greedy=125.0118 trees=1430
+R9_6       n= 9 vars=120 opt=130.2762 greedy=135.7577 trees=1430
+R9_7       n= 9 vars=120 opt=133.4261 greedy=133.4261 trees=1430
+R9_8       n= 9 vars=120 opt=109.2121 greedy=109.2121 trees=1430
+R9_9       n= 9 vars=120 opt=109.1479 greedy=109.1479 trees=1430
+R10_0      n=10 vars=165 opt=128.9637 greedy=144.8820 trees=4862
+R10_1      n=10 vars=165 opt=148.4833 greedy=148.4833 trees=4862
+R10_2      n=10 vars=165 opt=119.4103 greedy=119.4103 trees=4862
+R10_3      n=10 vars=165 opt=140.0237 greedy=167.5386 trees=4862
+R10_4      n=10 vars=165 opt=148.8979 greedy=174.6442 trees=4862
+R10_5      n=10 vars=165 opt=132.5227 greedy=132.5227 trees=4862
+R10_6      n=10 vars=165 opt=108.7678 greedy=108.7678 trees=4862
+R10_7      n=10 vars=165 opt=131.6968 greedy=137.0562 trees=4862
+R10_8      n=10 vars=165 opt=129.8284 greedy=143.2985 trees=4862
+R10_9      n=10 vars=165 opt=141.4573 greedy=159.2889 trees=4862
+R11_0      n=11 vars=220 opt=127.5262 greedy=127.5262 trees=16796
+R11_1      n=11 vars=220 opt=118.8971 greedy=123.3049 trees=16796
+R11_2      n=11 vars=220 opt=140.2738 greedy=141.7655 trees=16796
+R11_3      n=11 vars=220 opt=132.2908 greedy=140.5557 trees=16796
+R11_4      n=11 vars=220 opt=113.4035 greedy=113.4035 trees=16796
+R11_5      n=11 vars=220 opt=132.6849 greedy=163.6077 trees=16796
+R11_6      n=11 vars=220 opt=150.9537 greedy=173.4905 trees=16796
+R11_7      n=11 vars=220 opt=122.9419 greedy=122.9419 trees=16796
+R11_8      n=11 vars=220 opt=111.7351 greedy=116.1578 trees=16796
+R11_9      n=11 vars=220 opt=136.9412 greedy=161.2724 trees=16796
+R12_0      n=12 vars=286 opt=155.7323 greedy=160.4029 trees=58786
+R12_1      n=12 vars=286 opt=134.4149 greedy=137.2336 trees=58786
+R12_2      n=12 vars=286 opt=141.7592 greedy=151.1733 trees=58786
+R12_3      n=12 vars=286 opt=143.0413 greedy=168.1757 trees=58786
+R12_4      n=12 vars=286 opt=121.0452 greedy=124.9233 trees=58786
+R12_5      n=12 vars=286 opt=110.0894 greedy=111.2787 trees=58786
+R12_6      n=12 vars=286 opt=140.4665 greedy=158.8167 trees=58786
+R12_7      n=12 vars=286 opt=136.5558 greedy=137.1627 trees=58786
+R12_8      n=12 vars=286 opt=125.5242 greedy=129.3704 trees=58786
+R12_9      n=12 vars=286 opt=120.0299 greedy=120.0299 trees=58786
+engine done 2026-09-28T04:56:15.6356925+02:00
+MP_P507-A hits 11 / 64 382 us/read
+MP_P507-B hits 9 / 64 286 us/read
+R10_0 hits 0 / 64 2436 us/read
+R10_1 hits 0 / 64 2356 us/read
+R10_2 hits 0 / 64 2539 us/read
+R10_3 hits 0 / 64 2301 us/read
+R10_4 hits 0 / 64 2318 us/read
+R10_5 hits 0 / 64 2346 us/read
+R10_6 hits 0 / 64 2325 us/read
+R10_7 hits 0 / 64 2871 us/read
+R10_8 hits 0 / 64 2547 us/read
+R10_9 hits 0 / 64 2328 us/read
+R11_0 hits 0 / 64 3628 us/read
+R11_1 hits 0 / 64 3372 us/read
+R11_2 hits 0 / 64 3365 us/read
+R11_3 hits 0 / 64 3894 us/read
+R11_4 hits 0 / 64 3562 us/read
+R11_5 hits 0 / 64 3641 us/read
+R11_6 hits 0 / 64 4086 us/read
+R11_7 hits 0 / 64 3259 us/read
+R11_8 hits 0 / 64 3956 us/read
+R11_9 hits 0 / 64 3933 us/read
+R12_0 hits 0 / 64 5114 us/read
+R12_1 hits 0 / 64 4568 us/read
+R12_2 hits 0 / 64 4400 us/read
+R12_3 hits 0 / 64 5383 us/read
+R12_4 hits 0 / 64 5043 us/read
+R12_5 hits 0 / 64 4618 us/read
+R12_6 hits 0 / 64 4642 us/read
+R12_7 hits 0 / 64 4419 us/read
+R12_8 hits 0 / 64 4866 us/read
+R12_9 hits 0 / 64 4649 us/read
+R4_0 hits 19 / 64 132 us/read
+R4_1 hits 16 / 64 131 us/read
+R4_2 hits 8 / 64 147 us/read
+R4_3 hits 18 / 64 153 us/read
+R4_4 hits 15 / 64 153 us/read
+R4_5 hits 15 / 64 149 us/read
+R4_6 hits 22 / 64 151 us/read
+R4_7 hits 17 / 64 149 us/read
+R4_8 hits 16 / 64 150 us/read
+R4_9 hits 23 / 64 150 us/read
+R5_0 hits 4 / 64 304 us/read
+R5_1 hits 11 / 64 290 us/read
+R5_2 hits 11 / 64 293 us/read
+R5_3 hits 6 / 64 287 us/read
+R5_4 hits 11 / 64 292 us/read
+R5_5 hits 6 / 64 290 us/read
+R5_6 hits 8 / 64 293 us/read
+R5_7 hits 14 / 64 294 us/read
+R5_8 hits 3 / 64 248 us/read
+R5_9 hits 6 / 64 292 us/read
+R6_0 hits 1 / 64 505 us/read
+R6_1 hits 3 / 64 505 us/read
+R6_2 hits 3 / 64 516 us/read
+R6_3 hits 2 / 64 445 us/read
+R6_4 hits 2 / 64 422 us/read
+R6_5 hits 2 / 64 423 us/read
+R6_6 hits 0 / 64 406 us/read
+R6_7 hits 2 / 64 455 us/read
+R6_8 hits 4 / 64 509 us/read
+R6_9 hits 5 / 64 509 us/read
+R7_0 hits 1 / 64 861 us/read
+R7_1 hits 0 / 64 724 us/read
+R7_2 hits 3 / 64 726 us/read
+R7_3 hits 0 / 64 713 us/read
+R7_4 hits 0 / 64 716 us/read
+R7_5 hits 0 / 64 873 us/read
+R7_6 hits 1 / 64 708 us/read
+R7_7 hits 2 / 64 707 us/read
+R7_8 hits 0 / 64 679 us/read
+R7_9 hits 1 / 64 838 us/read
+R8_0 hits 0 / 64 1530 us/read
+R8_1 hits 0 / 64 1328 us/read
+R8_2 hits 1 / 64 1302 us/read
+R8_3 hits 0 / 64 1292 us/read
+R8_4 hits 0 / 64 1182 us/read
+R8_5 hits 0 / 64 1175 us/read
+R8_6 hits 0 / 64 1084 us/read
+R8_7 hits 0 / 64 1062 us/read
+R8_8 hits 0 / 64 1042 us/read
+R8_9 hits 0 / 64 1097 us/read
+R9_0 hits 0 / 64 1665 us/read
+R9_1 hits 0 / 64 1807 us/read
+R9_2 hits 1 / 64 1657 us/read
+R9_3 hits 0 / 64 1904 us/read
+R9_4 hits 0 / 64 1648 us/read
+R9_5 hits 0 / 64 1922 us/read
+R9_6 hits 0 / 64 1769 us/read
+R9_7 hits 1 / 64 2005 us/read
+R9_8 hits 0 / 64 1641 us/read
+R9_9 hits 0 / 64 1885 us/read
+neal 0.6.0 dimod 0.12.21 sweeps 420 reads 64
+neal done 2026-09-28T04:56:31.4090415+02:00
+all done 2026-09-28T05:02:00.5582485+02:00
