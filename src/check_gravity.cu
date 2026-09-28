@@ -27,6 +27,7 @@
 #include "ising_recon.hpp"
 #include "op_gravity.hpp"
 #include "run_talk.hpp"
+#include "ledger_out.hpp"
 
 #include <algorithm>
 #include <cmath>
@@ -178,6 +179,7 @@ static Outcome run(double sigma, unsigned threads, RunTalk& talk, bool draw) {
 
 int main() {
     RunTalk talk = RunTalk::begin("check_gravity");
+    LedgerOut ledger("check_gravity");
     const unsigned hw = std::max(1u, std::thread::hardware_concurrency());
     const unsigned threads = hw > 2 ? hw - 2 : 1;   // leave the owner some of his machine
     std::printf("  gravity only: 16,384 bits, 256 stations, body 64 bits (an 8 m cube, centre 12 m "
@@ -208,6 +210,23 @@ int main() {
         std::printf("           U1 (ADR-019): %d confident off the truth -> %s; "
                     "U2 (reported): %d body bits called rock\n",
                     o.confident - o.hits, u1 ? "PASS" : "FAIL", o.u2_miss);
+
+        // ADR-021: this sigma, for the chain.
+        const std::string k = "sigma" + std::to_string(int(sigma)) + "/";
+        const std::string in = "{\"sigma_ugal\":" + LedgerOut::dbl(sigma) + ",\"stations\":256,\"bits\":16384}";
+        const char* src = "check_gravity: gravity only, an 8 m cube 12 m down (ADR-017 L1, ADR-019)";
+        const char* exitv = o.ok ? "PASS" : (xfail ? "XFAIL" : "FAIL");
+        ledger.num(k + "data_nats", o.gain, "nats", pay ? "PAY" : "DECLINE", src, in);
+        ledger.num(k + "prior_nats", o.cost, "nats", pay ? "PAY" : "DECLINE", src, in);
+        ledger.num(k + "confident", o.confident, "bits", exitv, src, in);
+        ledger.num(k + "correct", o.hits, "bits", exitv, src, in);
+        ledger.num(k + "undecided", o.undecided, "bits", "REPORTED", src, in);
+        ledger.num(k + "off_truth", o.confident - o.hits, "bits", u1 ? "PASS" : "FAIL",
+                   "ADR-019 U1: no confident bit off the truth", in);
+        ledger.num(k + "u2_misses", o.u2_miss, "bits", "REPORTED", "ADR-019 U2 (reported)", in);
+        ledger.num(k + "control_false", o.control_false, "bits", o.control_false == 0 ? "PASS" : "FAIL", src, in);
+        ledger.num(k + "energy_truth", o.e_truth, "nats", "REPORTED", "model vs sampler diagnostic", in);
+        ledger.num(k + "energy_best_branch", o.e_best, "nats", "REPORTED", "model vs sampler diagnostic", in);
         std::printf("           energy: truth %.1f, best branch %.1f, mean branch %.1f  (%s)\n",
                     o.e_truth, o.e_best, o.e_mean,
                     o.e_best < o.e_truth ? "the model prefers the branches: a MODEL bias"
@@ -216,6 +235,7 @@ int main() {
     std::printf("\n  the bits at sigma = 1 microGal, section through the body (y = +1 m):\n");
     run(1.0, threads, talk, true);
     std::printf("\n  %s\n", fails ? "FAILURES" : "all checks passed");
+    ledger.write();
     talk.end(fails ? "FAIL" : "PASS");
     return fails ? 1 : 0;
 }

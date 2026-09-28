@@ -20,6 +20,7 @@
 #include "muon_replica.hpp"
 #include "ising_recon.hpp"
 #include "run_talk.hpp"
+#include "ledger_out.hpp"
 
 #include <algorithm>
 #include <chrono>
@@ -104,6 +105,7 @@ static int g_candidates = 1 << 27;
 
 int main(int argc, char** argv) {
     RunTalk talk = RunTalk::begin("check_ising");
+    LedgerOut ledger("check_ising");
     // optional: exposure as log2(candidates per chamber), for the exposure sweep
     if (argc > 1) g_candidates = 1 << std::atoi(argv[1]);
     std::printf("\nQuBLAR -- binary branches (ADR-007)\n\n");
@@ -296,6 +298,25 @@ int main(int argc, char** argv) {
               num("off truth", n_not - hit));
         std::printf("    U2 (ADR-019, reported): %d true-void bits called rock with confidence\n",
                     u2_miss);
+
+        // ADR-021: the body run, for the chain.
+        const std::string in = "{\"exposure_log2\":" + std::to_string(log2_exp) +
+                               ",\"branches\":" + std::to_string(kBranches) + ",\"bits\":" +
+                               std::to_string(prob.n_vars()) + "}";
+        const char* src = "check_ising section B: pyramid void, muon tomography (ADR-007, ADR-019)";
+        ledger.num("void/data_nats", gain, "nats", data_pay ? "PASS" : "DECLINE", src, in);
+        ledger.num("void/prior_nats", cost, "nats", data_pay ? "PASS" : "DECLINE", src, in);
+        ledger.num("void/truth_bits", truth_n, "bits", "PASS", src, in);
+        ledger.num("void/confident", n_not, "bits", "PASS", src, in);
+        ledger.num("void/correct", hit, "bits", "PASS", src, in);
+        ledger.num("void/off_truth", n_not - hit, "bits", n_not == hit ? "PASS" : "FAIL",
+                   "ADR-019 U1: no confident void off the truth", in);
+        ledger.num("void/u2_misses", u2_miss, "bits", "REPORTED", "ADR-019 U2 (reported)", in);
+        ledger.num("void/undecided", n_und, "bits", "REPORTED", src, in);
+        if (data_pay) {
+            ledger.num("void/centroid_m", dist, "m", dist >= 0.0 && dist < 6.0 ? "PASS" : "FAIL", src, in);
+            ledger.num("void/iou", iou, "1", "REPORTED", src, in);
+        }
     }
 
     // ---- C. hallucination ------------------------------------------------------
@@ -335,6 +356,9 @@ int main(int argc, char** argv) {
     } else
         check(false_not == 0, "no void is found where there is none",
               num("false voids", false_not));
+    ledger.num("control/false_voids", false_not, "bits", false_not == 0 ? "PASS" : "FAIL",
+               "check_ising section C: the empty pyramid, same seeds, same priors",
+               "{\"exposure_log2\":" + std::to_string(log2_exp) + "}");
 
     // ---- D. data or prior ------------------------------------------------------
     std::printf("\n  D. the void run with the prior off (lambda = kappa = 0)\n");
@@ -567,12 +591,30 @@ int main(int argc, char** argv) {
             }
         }
         std::printf("\n    exported build\\ising_out_* (p_void grids, truth, branches, meta)\n");
+
+        // ADR-021: the posterior as a signed cloud (one byte per voxel).
+        write_cloud_u8("out/ledger/cloud_pyramid.u8", size_t(kN) * kN * kN, prob.var_voxel, pv);
+        {
+            std::ofstream m("out/ledger/cloud_pyramid.json");
+            m << "{\"nx\":" << kN << ",\"voxel_m\":" << kVoxel << ",\"lo_m\":[" << kLo.x << ","
+              << kLo.y << "," << kLo.z << "],\"encoding\":\"u8: 255 outside the domain, round(254 p_void) inside\","
+              << "\"classify\":{\"exists_max\":0.1,\"not_there_min\":0.9},\"truth_voxels\":[";
+            bool first = true;
+            for (size_t v = 0; v < truth.size(); ++v)
+                if (truth[v]) { m << (first ? "" : ",") << v; first = false; }
+            m << "]}\n";
+        }
+        const std::string cin = "{\"nx\":" + std::to_string(kN) + "}";
+        const char* csrc = "check_ising posterior p_void over the pyramid (ADR-021 cloud)";
+        ledger.artifact("cloud/pyramid_u8", double(prob.n_vars()), "bits", "out/ledger/cloud_pyramid.u8", csrc, cin);
+        ledger.artifact("cloud/pyramid_meta", double(truth_n), "bits", "out/ledger/cloud_pyramid.json", csrc, cin);
     }
 
     cudaFree(d_mu);
     cudaFree(d_mu_empty);
     const char* verdict = failures == 0 ? "PASS" : "FAIL";
     std::printf("\n%s\n\n", failures == 0 ? "all checks passed" : "FAILURES PRESENT");
+    ledger.write();
     talk.end(verdict);
     return failures == 0 ? 0 : 1;
 }

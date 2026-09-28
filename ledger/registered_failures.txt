@@ -1,0 +1,4 @@
+# Failures that were predicted before the run that shows them (ADR-021).
+# One per line: <check> | <ledger id> | <ADR and prereg> | <what>
+# A check that exits non-zero is signed only when every FAIL entry it wrote is listed here.
+check_fusion | qublar/check_fusion/muons/off_truth | ADR-019 section 4, prereg SHA-256 d55ce27b0cf98ddbf12cb8b236e0de07bb57e32835409c3ddb7b61370f106b04 | muons alone mark 3 confident bits off the ore

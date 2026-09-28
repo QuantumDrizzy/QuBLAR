@@ -17,6 +17,7 @@
 #include "muon_replica.hpp"
 #include "ising_recon.hpp"
 #include "run_talk.hpp"
+#include "ledger_out.hpp"
 
 #include <algorithm>
 #include <chrono>
@@ -241,6 +242,7 @@ static BodyResult run_body(float ore_half, int candidates, unsigned n_threads, R
 
 int main(int argc, char** argv) {
     RunTalk talk = RunTalk::begin("check_mine");
+    LedgerOut ledger("check_mine");
     std::printf("\nQuBLAR -- check_mine (denser ore, declared contrast)\n\n");
     std::printf("  declared: rho_rock = 2.65 g/cm^3 (Lesparre / PDG); "
                 "rho_ore/rho_rock = %.2f; mu_ore = %.4g /m; a_per_metre = %.4g /m\n",
@@ -300,12 +302,30 @@ int main(int argc, char** argv) {
                   std::string(tag) + ", " + num("off truth", R.n_ore_label - R.hit));
             std::printf("    U2 (ADR-019, reported): %d true-ore bits called rock with confidence\n",
                         R.u2_miss);
+
+            // ADR-021: this run, for the chain.
+            const std::string k = "half" + std::to_string(int(half)) + "_exp" + std::to_string(log2e) + "/";
+            const std::string in = "{\"ore_half_m\":" + LedgerOut::dbl(half) + ",\"exposure_log2\":" +
+                                   std::to_string(log2e) + ",\"rho_ratio\":" + LedgerOut::dbl(kRhoRatio) + "}";
+            const char* src = "check_mine: denser ore under a mountain, three muon chambers (ADR-019)";
+            const char* budget = R.data_pay ? "PAY" : "DECLINE";
+            ledger.num(k + "data_nats", R.gain, "nats", budget, src, in);
+            ledger.num(k + "prior_nats", R.cost, "nats", budget, src, in);
+            ledger.num(k + "truth_bits", R.truth_n, "bits", "PASS", src, in);
+            ledger.num(k + "confident", R.n_ore_label, "bits", R.ok ? "PASS" : "FAIL", src, in);
+            ledger.num(k + "correct", R.hit, "bits", R.ok ? "PASS" : "FAIL", src, in);
+            ledger.num(k + "off_truth", R.n_ore_label - R.hit, "bits",
+                       R.n_ore_label == R.hit ? "PASS" : "FAIL", "ADR-019 U1: no confident ore off the truth", in);
+            ledger.num(k + "u2_misses", R.u2_miss, "bits", "REPORTED", "ADR-019 U2 (reported)", in);
+            ledger.num(k + "control_false", R.false_ore, "bits", R.false_ore == 0 ? "PASS" : "FAIL", src, in);
+            if (R.data_pay) ledger.num(k + "centroid_m", R.dist, "m", R.ok ? "PASS" : "FAIL", src, in);
         }
         std::printf("\n");
     }
 
     const char* verdict = failures == 0 ? "PASS" : "FAIL";
     std::printf("%s\n\n", failures == 0 ? "all checks passed" : "FAILURES PRESENT");
+    ledger.write();
     talk.end(verdict);
     return failures == 0 ? 0 : 1;
 }

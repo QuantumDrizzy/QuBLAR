@@ -22,6 +22,7 @@
 #include "ising_recon.hpp"
 #include "op_gravity.hpp"
 #include "run_talk.hpp"
+#include "ledger_out.hpp"
 
 #include <algorithm>
 #include <cmath>
@@ -157,6 +158,7 @@ static int count_confident(const std::vector<float>& p) {
 
 int main() {
     RunTalk talk = RunTalk::begin("check_fusion");
+    LedgerOut ledger("check_fusion");
     const unsigned hw = std::max(1u, std::thread::hardware_concurrency());
     const unsigned threads = hw > 2 ? hw - 2 : 1;
 
@@ -320,6 +322,37 @@ int main() {
     cudaFree(d_ore);
     cudaFree(d_empty);
     std::printf("\n  %s\n", fails ? "FAILURES" : "all exit rules passed");
+
+    // ADR-021: every sensor and every rule, for the chain. The muons-only U1
+    // failure is registered (ADR-019 section 4) and is signed as a FAIL.
+    {
+        const std::string in = "{\"muon_candidates_log2\":23,\"sigma_ugal\":1,\"ore_half_m\":4,\"ore_depth_m\":20}";
+        const char* src = "check_fusion: muons + gravity on one field (ADR-018, ADR-019)";
+        const struct { const char* key; double g; const Stats* s; int ctrl; } rows[3] = {
+            {"muons", g_mu, &s_mu, count_confident(c_mu)},
+            {"gravity", g_gr, &s_gr, count_confident(c_gr)},
+            {"fused", g_fu, &s_fu, count_confident(c_fu)}};
+        for (const auto& r : rows) {
+            const std::string k = std::string(r.key) + "/";
+            const bool pays = r.g > cost;
+            ledger.num(k + "data_nats", r.g, "nats", pays ? "PAY" : "DECLINE", src, in);
+            ledger.num(k + "confident", r.s->confident, "bits", "REPORTED", src, in);
+            ledger.num(k + "on_ore", r.s->hits, "bits", "REPORTED", src, in);
+            ledger.num(k + "off_truth", r.s->confident - r.s->hits, "bits",
+                       r.s->confident == r.s->hits ? "PASS" : "FAIL", "ADR-019 U1: no confident bit off the truth", in);
+            ledger.num(k + "u2_misses", r.s->u2_miss, "bits", "REPORTED", "ADR-019 U2 (reported)", in);
+            ledger.num(k + "undecided", r.s->undecided, "bits", "REPORTED", src, in);
+            ledger.num(k + "control_false", r.ctrl, "bits", r.ctrl == 0 ? "PASS" : "FAIL", src, in);
+            if (r.s->claimed) ledger.num(k + "claimed_depth_m", r.s->depth_claimed, "m", "REPORTED", src, in);
+            if (r.s->confident) ledger.num(k + "horizontal_m", r.s->horiz, "m", "REPORTED", src, in);
+        }
+        ledger.num("prior_nats", cost, "nats", "REPORTED", src, in);
+        ledger.flag("r1_evidence_adds", r1, r1 ? "PASS" : "FAIL", "ADR-018 R1", in);
+        ledger.flag("r2_controls_clean", r2, r2 ? "PASS" : "FAIL", "ADR-018 R2", in);
+        ledger.flag("r4_fused_localised", r4, r4 ? "PASS" : "FAIL", "ADR-018 R4", in);
+        ledger.flag("r3_decidable", std::string(r3) != "NOT DECIDABLE", "REPORTED", "ADR-018 R3", in);
+    }
+    ledger.write();
     talk.end(fails ? "FAIL" : "PASS");
     return fails ? 1 : 0;
 }

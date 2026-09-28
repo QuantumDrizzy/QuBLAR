@@ -14,6 +14,7 @@
 #include "muon_replica.hpp"
 #include "ising_recon.hpp"
 #include "run_talk.hpp"
+#include "ledger_out.hpp"
 
 #include <algorithm>
 #include <chrono>
@@ -125,6 +126,7 @@ static void fill_domain(const std::vector<float>& host_solid, std::vector<char>&
 
 int main(int argc, char** argv) {
     RunTalk talk = RunTalk::begin("check_ahead");
+    LedgerOut ledger("check_ahead");
     std::printf("\nQuBLAR -- check_ahead (cavity %.0f m ahead, traversable policy)\n\n",
                 kAheadM);
     std::printf("  policy: Exists = traversable; Undecided|NotThere = not traversable\n");
@@ -274,6 +276,21 @@ int main(int argc, char** argv) {
                 false_not, clear_where_cavity, block_where_cavity);
     check(false_not == 0, "control invents no confident void",
           num("false NotThere", false_not));
+    {
+        // ADR-021: the cavity-ahead run, for the chain.
+        const std::string in = "{\"exposure_log2\":" + std::to_string(log2e) + ",\"cavity_ahead_m\":5}";
+        const char* src = "check_ahead: a cavity 5 m ahead of the face, traversable policy (ADR-019)";
+        ledger.num("data_nats", gain, "nats", data_pay ? "PAY" : "DECLINE", src, in);
+        ledger.num("prior_nats", cost, "nats", data_pay ? "PAY" : "DECLINE", src, in);
+        ledger.num("truth_bits", truth_n, "bits", "PASS", src, in);
+        ledger.num("confident", n_not_all, "bits", "REPORTED", src, in);
+        ledger.num("correct", hit, "bits", "REPORTED", src, in);
+        ledger.num("off_truth", n_not_all - hit, "bits", n_not_all == hit ? "PASS" : "FAIL",
+                   "ADR-019 U1: no confident void off the truth", in);
+        ledger.num("cavity_blocked", n_block, "bits", n_clear_on_truth == 0 ? "PASS" : "FAIL", src, in);
+        ledger.num("control_false", false_not, "bits", false_not == 0 ? "PASS" : "FAIL", src, in);
+        if (data_pay && hit > 0) ledger.num("centroid_m", dist, "m", dist < 6.0 ? "PASS" : "FAIL", src, in);
+    }
     check(block_where_cavity == 0 && clear_where_cavity == cavity_slots,
           "control: ahead region is traversable",
           num("clear", clear_where_cavity) + ", " + num("slots", cavity_slots));
@@ -282,6 +299,7 @@ int main(int argc, char** argv) {
     cudaFree(d_empty);
     const char* verdict = failures == 0 ? "PASS" : "FAIL";
     std::printf("\n%s\n\n", failures == 0 ? "all checks passed" : "FAILURES PRESENT");
+    ledger.write();
     talk.end(verdict);
     return failures == 0 ? 0 : 1;
 }

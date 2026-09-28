@@ -16,3 +16,6 @@ __pycache__/
 experiments/**/*.f32
 experiments/**/*.u8
 experiments/**/*.npz
+
+# ADR-021: ledger fragments, batches and artifacts (regenerate: python tools/ledger_batch.py)
+out/
