@@ -1,0 +1,5 @@
+sha256=c5f05230ae0137dcae1513e89b940983c46fd0f6dfb60c5cc51724d2fd3d5a59
+file=experiments/fusion/ADR-018.prereg-frozen.md
+frozen_at=2026-09-28T19:01:10.5015645+02:00
+git_head=18b71da90d82cd36cfe5e28abd5301f43c3bba7c
+note=frozen before any check_fusion code was written or run
