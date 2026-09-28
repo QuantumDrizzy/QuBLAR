@@ -51,6 +51,34 @@ not tuned.
 Density only, never chemistry (ADR-017 rule 1). No days of exposure (the flux is not
 calibrated for this depth). Synthetic truth only.
 
-## 6. Results
+## 6. Results (2026-09-28, first and only run; sections 1–5 unchanged)
 
-(to be filled after the run)
+`build\check_fusion.exe`: 31,080 bits, ore 64 bits, 74,265 muon rows, 256 gravity stations,
+prior 634.0 nats; wall 38.9 s (GPU 0.12 s, CPU 35.0 s). Exit 0.
+
+| sensor | data nats | budget | confident (on ore) | claimed p>=0.5 | undecided | horiz (conf) | depth (claimed) | control |
+|---|---:|---|---:|---:|---:|---:|---:|---:|
+| muons | 254.0 | decline | 3 (0) | 6 | 3 | 0.47 m | 31.67 m | 0 |
+| gravity | 531.2 | decline | 0 (0) | 0 | 48 | — | — | 0 |
+| **fused** | **785.2** | **pay** | **20 (20)** | 34 | 28 | **0.94 m** | **18.18 m** | 0 |
+
+Truth: depth 20.0 m, horizontal 0 m.
+
+- **R1 PASS:** 785.161131 = 254.0 + 531.2, exact.
+- **R2 PASS:** no confident bit in any control.
+- **R3 NOT DECIDABLE, which counts as a FAIL for the question:** gravity alone claimed no bit at
+  p ≥ 0.5, so it has no depth to compare. *Unregistered observation, labelled as such:* gravity's
+  undecided bits sit at 7–9 m (the depth bias of `check_gravity`), and the fused claimed centroid
+  is at 18.2 m.
+- **R4 PASS:** the fused evidence pays, with 20 confident bits, all 20 on the ore, horizontal
+  centroid 0.94 m.
+
+**What it says.** Neither sensor alone pays for the body. Stacked on the same bits, they do: the
+same bits seen through two physics.
+
+**A finding outside the registered rules.** Muons alone, while their budget declines, mark **3
+confident bits, none on the ore**, about 11 m below it on the line of the near-vertical rays. That
+is a stone called ore. `check_mine`'s rule ("on a decline, no confident bit *on the body*") does
+not catch it, because it only looks at the body. The next pre-registration adds a universal rule
+for every check: **no confident bit off the truth, ever**. `check_mine` and `check_ising` are
+re-run under it before any claim of theirs is repeated.
