@@ -172,6 +172,12 @@ document written after:
 | [ADR-006](docs/adr/ADR-006-muon-tomography.md) | muon mode: a ScanPyramids replica, three views, and continuous MLEM's measured limit |
 | [ADR-007](docs/adr/ADR-007-binary-branches.md) | the Ising engine: each voxel a bit, branches as posterior samples, a tri-state map of what exists, what does not and what cannot be decided |
 | [ADR-008](docs/adr/ADR-008-ising-photonic-engine.md) | the contract: probe, forward model, inference, with the solvers pluggable behind the QUBO |
+| [ADR-009](docs/adr/ADR-009-diffractive-layers.md) | proposed, not built: a double-slit (diffractive) network as the "photonic" part of the engine |
+| [ADR-010](docs/adr/ADR-010-ark-falsification-test.md) | pre-registered synthetic falsification test: can muography tell the Durupinar formation from a buried hull? Hull hypotheses B1-B3 distinguishable, 3/3; minimum void 2 m (marginal) |
+| [ADR-011](docs/adr/ADR-011-khufu-muography-validation.md) | pre-registered Khufu validation: detection, localisation and blind check PASS; paper comparison partly consistent (18/25) |
+| [ADR-012](docs/adr/ADR-012-tunnel-nlos-ghost.md) | pre-registered NLOS around a mine-drift corner and ghost imaging through dust: 1/7 PASS |
+| [ADR-013](docs/adr/ADR-013-ree-separation-qubo.md) | pre-registered rare-earth solvent-extraction sequencing as a QUBO: 0/3 pass/fail rules PASS (R3 tie, R4 comparable) |
+| [ADR-014](docs/adr/ADR-014-ree-carbonatite-muography.md) | pre-registered muography of a REE carbonatite from an underground drift: 3/6 PASS |
 
 ## On trusting the numbers
 
