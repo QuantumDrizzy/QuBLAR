@@ -5,6 +5,30 @@
 **Deciders:** Antonio
 **Supersedes, as direction:** the one-pipeline shape of ADR-007/008. Their results stand.
 
+## The purpose: a reality engine
+
+QμBLAR is pointed at the real world: a mountain, a mine drift, a pyramid, a street. Like a
+detector at CERN or IceCube, its first discipline is **not to see what is not there**. The
+software is judged by its encounter with real data, not by its simulations. Five rules bind
+every layer below:
+
+1. **Claims only in the sensor's own property.** Muons and gravity measure density. They can
+   say "a denser body, with this evidence". They can never say "rare earths": a dense barren
+   gabbro and a rare-earth carbonatite can weigh the same. A claim about chemistry needs a
+   sensor that responds to the chemistry (gamma spectrometry for the thorium that often
+   accompanies carbonatites, magnetics, spectra), fused at L5. Every certificate names the
+   property it is about.
+2. **A discovery standard, in nats.** Particle physics asks for 5σ before "discovery". QμBLAR's
+   evidence budget is already a log-likelihood ratio in nats, so each domain declares its
+   threshold before any real data are seen: "evidence" at one level, "discovery" at a higher
+   one.
+3. **Calibration.** When the engine says 90 %, it must be right about 90 % of the time, over
+   many scenes with truth. A reliability curve is part of every sensor's acceptance.
+4. **Blind, pre-registered.** Rules and thresholds are frozen (SHA-256) before a run, as
+   ADR-010…016 already do, and never tuned after.
+5. **Real data closes the loop.** Synthetic twins train and test. Only published real
+   measurements (Khufu, public gravity surveys, LiDAR datasets) accept a sensor for use.
+
 ## Context: what QμBLAR is today (level 0)
 
 QμBLAR works, and it is soldered to its first problem:
