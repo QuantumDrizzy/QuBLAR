@@ -10,3 +10,9 @@ build/
 data/
 .zcode/
 __pycache__/
+
+# ADR-010..014: raw binary volumes/maps (.f32 up to 31 MB, 184 MB total). Regenerate with the
+# check_*.exe commands listed in each experiments/<name>/RESULTS.md (deterministic seeds).
+experiments/**/*.f32
+experiments/**/*.u8
+experiments/**/*.npz

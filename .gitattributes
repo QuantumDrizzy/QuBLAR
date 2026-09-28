@@ -1,2 +1,6 @@
 *.bat text eol=crlf
 
+
+# Frozen pre-registrations are hashed byte-for-byte; never convert line endings.
+*.prereg-frozen.md -text
+src/check_ark.cu -text
