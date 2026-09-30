@@ -118,11 +118,11 @@ Do not fake a live bridge.
   population / kinetics simulator.
 - **Does not fit:** no geometry, no occupancy, no forward imaging model.
 
-### ndim-lab (renderer, not a vehicle)
+### DIMMA (renderer, not a vehicle; was ndim-lab)
 
 - **Consumes:** spacetime **point clouds** (`SpacetimeCloud`: rows of named
   axes, RGB) or LiDAR `.laz` / video
-  ([`ndim/spacetime/cloud.py`](../../ndim-lab/ndim/spacetime/cloud.py),
+  ([`ndim/spacetime/cloud.py`](../../DIMMA/ndim/spacetime/cloud.py),
   ADR-0002/0003).
 - **Already used:** QuBLAR `tools/render_branches.py` converts the exported
   tri-state voxels into a point cloud of centres and renders with ndim.
