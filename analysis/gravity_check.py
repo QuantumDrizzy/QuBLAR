@@ -3,6 +3,11 @@
 exactness of the sphere field at an offset, the ore scene's closure, and two mutants caught
 (the prior without the one-anomaly reasoning, and the density sign flipped).
 
+G5 is measured, not asserted into a label: the underwater kernel must be the hand
+formula at range 350 m (platform 100 m above the water, voxels on the bottom) and
+must differ from the surface kernel. Station noise stays 3 uGal. The tri-state is
+whatever the run printed.
+
     python analysis/gravity_check.py
 """
 
@@ -67,6 +72,41 @@ def main():
     res_flip = gq.run_scene("ore_flipped", flipped)
     if res_flip["missed"] == 0 and res_flip["undecided"] == 0:
         fails.append("mutant not caught: flipped density sign")
+
+
+    # G5. Geometry only: platform 100 m above the water, same ore voxel on the bottom.
+    # The tri-state label is not locked -- it is printed from the gravity_qubo run.
+    uw = GP.get("underwater")
+    if uw is None:
+        fails.append("G5 underwater scene missing from gravity_probe.json")
+    else:
+        z_uw = 250.0 + 100.0
+        A_uw = gq.kernel(drho, radius, z_uw)
+        hand_uw = (6.674e-11 * drho * (4 / 3 * math.pi * radius ** 3)
+                   * z_uw / (dx2 + z_uw ** 2) ** 1.5 / 1e-8)
+        if abs(A_uw[nearest, j] - hand_uw) > 0.05 * abs(hand_uw):
+            fails.append(
+                f"underwater kernel differs from hand at {z_uw:.0f} m: "
+                f"{A_uw[nearest, j]:.3f} vs {hand_uw:.3f}")
+        if abs(A_uw[nearest, j] - A[nearest, j]) <= 1e-6 * abs(A[nearest, j]):
+            fails.append("underwater kernel identical to the surface kernel")
+        sig = gq.sphere_g_at(radius, drho, z_uw, cx, cy, cx, cy)
+        if abs(float(uw["signal_ugal"]) - round(sig, 1)) > 1e-9:
+            fails.append(
+                f"underwater signal {uw['signal_ugal']} is not the printed "
+                f"{z_uw:.0f} m sphere {sig:.1f}")
+        if float(uw.get("station_noise_ugal", -1)) != 3.0:
+            fails.append("underwater station noise is not 3 uGal")
+        if float(uw.get("platform_m", -1)) != 100.0 or float(uw.get("range_m", -1)) != z_uw:
+            fails.append(
+                f"underwater geometry is not platform 100 m / range {z_uw:.0f} m "
+                f"(got platform {uw.get('platform_m')} range {uw.get('range_m')})")
+        if int(uw["truth_voxel"]) != j:
+            fails.append("underwater truth voxel is not the ore voxel")
+        st = next(s for s in uw["states"] if s["voxel"] == int(uw["truth_voxel"]))
+        print(
+            f"underwater: signal {uw['signal_ugal']} uGal ({uw['sigma']} sigma) "
+            f"voxel {uw['truth_voxel']} p={st['p']:.3f} {st['state']}")
 
     print(f"ore: voxel-9 p={ore['states'][9]['p']:.3f} exists; wrong {ore['committed_wrong']}; "
           f"missed {ore['missed']}")

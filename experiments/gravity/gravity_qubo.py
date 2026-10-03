@@ -10,6 +10,9 @@ decided) comes from the annealed-sample marginals at the 0.9/0.1 margins.
 The truth emits as exact spheres; the kernel is point-mass per voxel -- the mismatch is
 measured by sub-cube refinement, not assumed away.
 
+G5 is a scene, not a sentence: the same ore body, voxels on the bottom, platform 100 m above
+the water column. Water is not in the kernel. Only the vertical range shifts (250 m -> 350 m).
+
     python experiments/gravity/gravity_qubo.py
 """
 
@@ -51,16 +54,30 @@ def idx_of(cell):
     return cy * CX + cx
 
 
-def kernel(drho, radius):
+def scene_range(scene):
+    """Sensor-to-voxel vertical distance (m).
+
+    Surface scenes use Z_LAYER, so the depth-mutant in gravity_check still bites by
+    swapping that global. G5 sets platform_m: the platform is that many metres above
+    the water surface and the voxels stay on the bottom, so the range is
+    Z_LAYER + platform_m. No water density, no new noise -- geometry only.
+    """
+    return Z_LAYER + float(scene.get("platform_m", 0.0))
+
+
+def kernel(drho, radius, z=None):
     """A[i, j]: vertical pull (uGal) at sensor i of the scene's sphere (radius, drho) sitting
-    at voxel j's centre. Newton's shell theorem: outside a sphere the field IS a point mass
-    with the sphere's volume -- exact, not an approximation. The voxel only fixes WHERE."""
+    at voxel j's centre, vertical distance z away. Newton's shell theorem: outside a sphere
+    the field IS a point mass with the sphere's volume -- exact, not an approximation. The
+    voxel only fixes WHERE. z defaults to Z_LAYER (the surface scenes)."""
+    if z is None:
+        z = Z_LAYER
     sensors = sensor_grid()
     cells = voxel_centres()
     A = np.zeros((len(sensors), len(cells)))
     for i, (sx, sy) in enumerate(sensors):
         for j, (cx, cy) in enumerate(cells):
-            dz = Z_LAYER
+            dz = z
             r2 = (sx - cx) ** 2 + (sy - cy) ** 2 + dz ** 2
             gz = G * drho * (4.0 / 3.0 * math.pi * radius ** 3) * dz / r2 ** 1.5
             A[i, j] = gz / UGAL
@@ -68,16 +85,19 @@ def kernel(drho, radius):
 
 
 def sphere_g_at(radius_m, drho, z_centre, sx, sy, cx, cy):
-    """Exact sphere pull (uGal) at a surface point (point-mass far field of the sphere:
-    exact for dx = 0, first order off-axis)."""
+    """Exact sphere pull (uGal) at a platform point a vertical distance z_centre from the
+    sphere's centre (point-mass far field of the sphere: exact for dx = 0, first order
+    off-axis)."""
     vol = 4.0 / 3.0 * math.pi * radius_m ** 3
     dx2 = (sx - cx) ** 2 + (sy - cy) ** 2
     r2 = dx2 + z_centre ** 2
     return G * drho * vol * z_centre / r2 ** 1.5 / UGAL
 
 
-def cube_refinement(drho, cx, cy, sensor):
+def cube_refinement(drho, cx, cy, sensor, z=None):
     """The voxel's true cube pull by sub-cube refinement (SUB^3 sub-cubes, point-mass each)."""
+    if z is None:
+        z = Z_LAYER
     sx, sy = sensor
     step = CELL / SUB
     total = 0.0
@@ -86,7 +106,7 @@ def cube_refinement(drho, cx, cy, sensor):
             for k in range(SUB):
                 px = cx - CELL / 2 + step * (i + 0.5)
                 py = cy - CELL / 2 + step * (jj + 0.5)
-                pz = Z_LAYER - CELL / 2 + step * (k + 0.5)
+                pz = z - CELL / 2 + step * (k + 0.5)
                 dx2 = (sx - px) ** 2 + (sy - py) ** 2
                 r2 = dx2 + pz ** 2
                 total += G * drho * step ** 3 * pz / r2 ** 1.5
@@ -100,15 +120,20 @@ SCENES = {
                "note": "cavity: near two sigma after stacking"},
     "cavity_small": {"cell": (0, 3), "radius": 10.0, "drho": -1600.0,
                      "note": "10 m cavity: 0.7 uGal, under the noise -- must land undecided"},
+    # G5. Same ore body, same voxels on the bottom, same 3 uGal station noise.
+    # The platform is 100 m above the water column; the kernel sees only the extra range.
+    "underwater": {"cell": (1, 2), "radius": 25.0, "drho": +1500.0, "platform_m": 100.0,
+                   "note": "G5: platform 100 m above the water, ore on the bottom -- geometry only"},
 }
 
 
 def run_scene(name, scene):
     rng = np.random.default_rng(SEED)
-    A = kernel(scene["drho"], scene["radius"])
+    z = scene_range(scene)
+    A = kernel(scene["drho"], scene["radius"], z)
     cx, cy = voxel_centres()[idx_of(scene["cell"])]
     sensors = sensor_grid()
-    d = np.array([sphere_g_at(scene["radius"], scene["drho"], Z_LAYER, sx, sy, cx, cy)
+    d = np.array([sphere_g_at(scene["radius"], scene["drho"], z, sx, sy, cx, cy)
                   for sx, sy in sensors])
     d_noisy = d + rng.normal(0.0, SIGMA_UGAL, len(d))
 
@@ -141,12 +166,13 @@ def run_scene(name, scene):
     Z_t = w_t.sum()
     p = (states_bits.astype(float) * w_t[:, None]).sum(axis=0) / Z_t
 
+    truth = idx_of(scene["cell"])
     states = []
     for j, pj in enumerate(p):
         state = ("exists" if pj >= 0.9 else
                  "does not exist" if pj <= 0.1 else "cannot be decided")
         states.append({"voxel": j, "p": round(float(pj), 3), "state": state,
-                       "truth": int(j == idx_of(scene["cell"]))})
+                       "truth": int(j == truth)})
 
     committed_wrong = [s for s in states if s["state"] == "exists" and s["truth"] == 0]
     missed = [s for s in states if s["truth"] == 1 and s["state"] == "does not exist"]
@@ -154,14 +180,22 @@ def run_scene(name, scene):
 
     j_above = idx_of((1, 1))
     point = A[j_above, j_above]
-    refined = cube_refinement(scene["drho"], *voxel_centres()[j_above], sensors[j_above])
+    refined = cube_refinement(scene["drho"], *voxel_centres()[j_above], sensors[j_above], z)
     g1_err = abs(point - refined) / abs(refined) * 100
+
+    signal = sphere_g_at(scene["radius"], scene["drho"], z, cx, cy, cx, cy)
+    n_sigma = signal / SIGMA_UGAL
+    platform_m = float(scene.get("platform_m", 0.0))
 
     print(f"=== scene: {name} -- {scene['note']} ===")
     print(f"kernel 36x16 at drho {scene['drho']:+.0f} kg/m3; exact optimum {energy_opt:.4f}; "
           f"neal hit: {hit} (400 reads)")
-    print(f"truth voxel {idx_of(scene['cell'])} holds the anomaly; its sphere reads "
-          f"{sphere_g_at(scene['radius'], scene['drho'], Z_LAYER, cx, cy, cx, cy):.1f} uGal above centre")
+    print(f"truth voxel {truth} holds the anomaly; its sphere reads "
+          f"{signal:.1f} uGal above centre ({n_sigma:.1f} sigma, range {z:.0f} m, "
+          f"station noise {SIGMA_UGAL:.0f} uGal)")
+    if platform_m:
+        print(f"G5 geometry: platform {platform_m:.0f} m above the water column, "
+              f"voxels on the bottom, no water term in the kernel")
     for s in states:
         if s["state"] != "does not exist" or s["truth"]:
             print(f"  voxel {s['voxel']} (truth {s['truth']}): p={s['p']:.3f} -> {s['state']}")
@@ -170,10 +204,19 @@ def run_scene(name, scene):
     print(f"G1 kernel check: point {point:.2f} vs refined cube {refined:.2f} uGal -> "
           f"err {g1_err:.2f} %\n")
 
+    truth_state = next(s for s in states if s["voxel"] == truth)
     return {"scene": name, "energy_opt": energy_opt, "hit": hit,
             "states": states, "committed_wrong": len(committed_wrong),
             "missed": len(missed), "undecided": len(undecided),
-            "g1_err_pct": round(g1_err, 2)}
+            "g1_err_pct": round(g1_err, 2),
+            "signal_ugal": round(float(signal), 1),
+            "sigma": round(float(n_sigma), 1),
+            "range_m": z,
+            "platform_m": platform_m,
+            "station_noise_ugal": SIGMA_UGAL,
+            "truth_voxel": truth,
+            "truth_p": truth_state["p"],
+            "truth_state": truth_state["state"]}
 
 
 def main():

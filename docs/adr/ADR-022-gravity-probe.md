@@ -55,6 +55,7 @@ the kind of slip the locks exist for; all three are recorded.
 | ore | 25 m sphere, +1500 kg/m³, 250 m | **10,5 μGal** (3,5σ) | **voxel 9: p = 0,914 exists** -- clean, no false positives |
 | cavity | 20 m sphere, −1600 kg/m³, 250 m | 5,7 μGal (1,9σ) | voxel 2 p = 0,393 and its neighbour p = 0,441: both **cannot be decided** |
 | small cavity | 10 m sphere, −1600 kg/m³, 250 m | 0,7 μGal (0,2σ) | **does not exist** (p = 0,037) at this integration |
+| underwater | same 25 m ore, +1500 kg/m³, platform 100 m above the water, range 350 m | **5,3 μGal** (1,8σ) | **voxel 9: p = 0,156 cannot be decided** -- does not match the surface ore row |
 
 neal hit the ExactSolver optimum in all three scenes (400 reads, seed 12345). The kernel is the
 exact sphere far-field by Newton's shell theorem -- the "error" rows in the output (47-97 %) are
@@ -68,7 +69,28 @@ now demonstrated inside the engine.
 | **G2** | **Pass, extended.** 10,5 μGal inside the predicted 10-11 band; with 36-sensor stacking (σ = 0,5 μGal) the 3σ reach of the ore body is **~660 m**, beyond the predicted 500-600. |
 | **G3** | **Pass.** neal hits the ExactSolver optimum in all three scenes; the tri-state separates the recoverable from the ambiguous. |
 | **G4** | **Half.** The 0,2σ cavity lands "does not exist" (p = 0,037), not "cannot be decided": under the one-anomaly prior the data actively disfavour it at this integration. The operational answer is right -- *not detectable at this integration* -- but the tri-state label conflates "absent" with "below the floor"; the engine's known semantics, now on record. |
-| **G5** | **Pass by construction.** Water is transparent to Newtonian gravity: the underwater scenario is the same kernel with the platform height shifted. The quantum content of both map cells is the sensor's noise floor, and the sourced AQG number is what makes 250-660 m depths reachable at all. |
+| **G5** | **Measured. Tri-state does not match.** Same ore body (25 m, +1500 kg/m³, voxel 9), platform 100 m above the water column, voxels on the bottom, range 350 m, station noise still 3 μGal, no water term. Signal above centre **5,3 μGal** (**1,8σ**). Truth voxel 9: **p = 0,156, cannot be decided** (voxels 10, 13 and 14 also undecided, p = 0,185 / 0,165 / 0,191; committed-wrong 0). The surface ore label was exists at p = 0,914. The kernel changed only by the geometry shift; the tri-state did not survive it. neal hit the ExactSolver optimum (400 reads, seed 12345). |
+
+## G5 measured (2026-10-03)
+
+On 2026-10-02 the G5 verdict was pass by construction. The numbers here are from the run.
+The scene is the ore body already measured (25 m sphere, +1500 kg/m³, voxel 9 on the
+bottom) -- not a new target and not a new sensor. The platform is 100 m above the water
+column, so the vertical range is 350 m. Station noise stays 3 μGal. The kernel is the
+same shell-theorem sphere field; there is no water-density term and no new physics.
+
+Printed by `experiments/gravity/gravity_qubo.py` and locked by `analysis/gravity_check.py`
+(hand kernel at 350 m, kernel distinct from the surface kernel, station noise still
+3 μGal; the tri-state label was not asserted in advance):
+
+- signal above centre: **5,3 μGal** (**1,8σ**), range 350 m
+- truth voxel 9: **p = 0,156 → cannot be decided**
+- also cannot be decided: voxel 10 p = 0,185, voxel 13 p = 0,165, voxel 14 p = 0,191
+- committed-wrong 0; missed 0; neal hit the ExactSolver optimum
+
+The surface ore row is voxel 9 p = 0,914 **exists**. The geometry shift alone does not
+preserve that label. G5's frozen prediction (the kernel changes only by the geometry
+shift) is what was run. The tri-state **does not match**.
 
 ## Verdict
 
@@ -78,7 +100,9 @@ gravimetry: a sourced quantum gravimeter at 3 μGal/station sees a 50 m ore body
 at 3,5σ, recovers it cleanly through the QUBO, tells the truth about a 20 m cavity (ambiguous
 with its neighbour -- the resolution limit is real), and refuses to hallucinate a 10 m cavity
 that sits under the noise floor. The depth reach with stacking is ~660 m for the ore class, and
-the underwater cell inherits it by geometry, not by new physics. The next hardware question is
+the underwater cell does not inherit that detection. Measured 2026-10-03, the same
+ore body with the platform 100 m above the water reads 5,3 μGal (1,8σ) and voxel 9
+cannot be decided (p = 0,156). The next hardware question is
 the gradiometer pair (common-mode rejection on a moving platform) -- the airborne paper in the
 manifest is where that rung starts.
 
@@ -86,4 +110,6 @@ manifest is where that rung starts.
 (exact for the emitted spheres, silent about real density distributions -- the non-uniqueness
 row); station noise white and known; no platform-motion error (the airborne paper's subject);
 the tri-state's "does not exist" conflates absence with below-the-floor (recorded as the
-engine's semantics, G4).
+engine's semantics, G4). G5, measured: a platform 100 m above the water (range 350 m,
+noise still 3 μGal) moves the same ore body from exists (p = 0,914) to cannot be decided
+(p = 0,156).
