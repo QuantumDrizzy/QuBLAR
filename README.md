@@ -20,7 +20,9 @@ exist*, *cannot be decided*) with a measured certainty for each bit
                                                             exact ROI posterior -> Blaze TT
 ```
 
-- The probes: photons (LiDAR, non-line-of-sight imaging) and cosmic-ray muons. Each emits
+- The probes: photons (LiDAR, non-line-of-sight imaging), cosmic-ray muons, and **gravity**
+  (Newtonian forward model, quantum-gravimeter noise floor -- underground and underwater
+  mapping, [ADR-022](docs/adr/ADR-022-gravity-probe.md)). Each emits
   its ground truth, so every reconstruction is scored against what actually happened.
 - The solvers are pluggable behind the QUBO; simulated annealing is the reference.
 
